@@ -13,6 +13,7 @@
 
 * Windows10
 * mbed EA LPC11U35
+* TeraTerm
 
 
 ## 準備
