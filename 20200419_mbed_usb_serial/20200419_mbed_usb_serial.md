@@ -1,13 +1,10 @@
-# mbed で USB シリアル通信
+# mbed(LPC11U35) で USB シリアル通信
 
-## 参考
+mbed LPC11U35 で USB シリアル通信をしたのでメモ
 
-* 1.2 とりあえず使ってみる
-    * https://os.mbed.com/users/yueee_yt/notebook/use_USB/
-* TeraTermを使ってPICとPC間でシリアル通信をする方法
-    * http://www2.kaiyodai.ac.jp/~jtahar0/posts/activity20.html
-* mbed(4) USBポートでシリアル通信
-    * http://www.wsnak.com/wsnakblog/?p=3502
+USB CDC(Communications Device Class)と呼ばれる<br>
+USB上でデバイス間のデータのやりとりを行うための通信規格を利用して実現している
+
 
 ## 環境
 
@@ -19,21 +16,24 @@
 ## 準備
 
 1. TeraTerm のインストール
-    * `choco install teraterm`
+    * Chocolatey を使用している場合は以下でインストール
+        * `choco install teraterm`
+    * それ以外は以下のサイトからインストーラをダウンロードしインストールする
+        * https://ja.osdn.net/projects/ttssh2/releases/
+1. mbed ワークスペースから USBDevice ライブラリをインポートする
 1. コーディングし mbed に書き込む
     * コードは以下を参照
 1. mbed をリセット
 1. OS が USB ポートを認識することを確認する
 1. TeraTerm を起動
 1. 新しい接続は シリアル を選択
-    * COM3 ポートとかになっているはず
+    * COMx ポートとかになっているはず
 1. TeraTerm から文字列を送信できるようにする
     * 「設定」タブ
     * 端末
     * 「ローカルエコー」にチェック
     * 「OK」
 1. TeraTerm から文字列を入力し、mbed からエコーバックされれば成功
-
 
 ## コード
 端末から文字列を受け取ってエコーバックするプログラム
@@ -55,3 +55,4 @@ int main() {
     }
 }
 ```
+
