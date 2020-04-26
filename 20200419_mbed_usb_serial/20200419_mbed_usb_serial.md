@@ -38,6 +38,7 @@ USB上でデバイス間のデータのやりとりを行うための通信規�
 ## コード
 端末から文字列を受け取ってエコーバックするプログラム
 
+
 ``` cpp
 #include "mbed.h"
 #include "USBSerial.h"
@@ -55,4 +56,4 @@ int main() {
     }
 }
 ```
-
+出典 : https://os.mbed.com/handbook/USBSerial
