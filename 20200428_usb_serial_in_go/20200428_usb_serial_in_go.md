@@ -26,11 +26,13 @@
 
 ## プログラムを作成
 そしてできたのが以下. Go 製です.
+
 * https://github.com/kita127/katuobushi
 
 一応、release ページに Windows 用のバイナリを置いてあるのでそちらをダウンロード&解凍すれば使用できるはずです.
 
 Go 言語用の USB Serial 通信のパッケージはいくつかありますが今回は以下をチョイス.
+
 * https://github.com/jacobsa/go-serial
 
 もうコード量それほどないのですべて載せます.
