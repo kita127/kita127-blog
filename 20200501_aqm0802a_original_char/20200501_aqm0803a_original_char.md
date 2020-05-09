@@ -54,7 +54,7 @@ mbed から AQM0802A にデータやコマンドを送信する際のフォー�
     * データの場合はデータを送信する
     * サイズは 1byte
 
-[[image:i2c_format.png]]
+![i2c_format](./image/i2c_format.png)
 
 ## パラメータの説明
 以上のフォーマットに従って AQM0802A を I2C で制御するわけなのですが, いろんなパラメータが登場し
@@ -108,8 +108,8 @@ AQM0802A への I2C を使った基本的なコマンド送信方法の説明も
 Set DDRAM address で指定するアドレスとは AQM0802A ディスプレイの 8x2 のどの位置に文字を表示するかになります.
 表示位置と DDRAM アドレスの対応は AQM0802A データシートの「液晶表示 DDRAMアドレス」から判断します.
 
-[[image:display_instruction_table.png]]<br>
-[[image:lcd_display_ddram_address.png]]<br>
+![display_instruction_table](./image/display_instruction_table.png)
+![lcd_display_ddram_address](./image/lcd_display_ddram_address.png)
 
 表示位置は2行目の4番目なので「液晶表示 DDRAMアドレス」一覧から 0x43 が該当します.
 
@@ -166,7 +166,7 @@ int main()
 本題のオリジナルキャラクタを作成して表示する手順です.
 画像のオリジナルキャラクタ(にこにこハート)を表示します.
 
-[[image:original_character.png]]
+![original_character](./image/original_character.png)
 
 表示手順は大まかに以下です.
 
@@ -177,12 +177,12 @@ int main()
 データシート, 「CHARACTER PATTERNS」の「CGRAM」と書かれた箇所がオリジナルのキャラクタ登録用に
 割り当てられたコードです. このいずれかのコードにこれから作成するオリジナルのキャラクタを紐付けます.
 
-[[image:character_patterns.png]]
+![character_patterns](./image/character_patterns.png)
 
 どのコードに割り当てるかは ST7032i データシートの 「Table4 Relationship between CGRAM Addresses 〜」 を
 見て判断します.
 
-[[image:relation_cgram.jpg]]
+![relation_cgram](./image/relation_cgram.jpg)
 
 CGRAM address の 5bit - 3bit がどのコード(DDRAM data)に登録するかを決定します.
 2bit - 0bit が CGRAM に書き込むドットパターンの行を決めます.
