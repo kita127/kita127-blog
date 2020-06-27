@@ -21,7 +21,7 @@ const (
 ```
 
 lint が許しません（＾＾）
-```shell
+```
 $golint .\sample.go
 sample.go:5:2: don't use ALL_CAPS in Go names; use CamelCase
 sample.go:6:2: don't use ALL_CAPS in Go names; use CamelCase
@@ -63,7 +63,7 @@ const (
 ```
 
 以下のコマンド実行でスネークケースの識別子がキャメルケースに変換されたソースが標準出力されます.
-```shell
+```
 $goconvcase --from us --to uc .\sample.go
 package sample
 
@@ -83,13 +83,13 @@ const (
 コメントの `// SNAKE_CASE identifires` はスネークケースのままです.
 
 ファイルを上書きする場合は, `gofmt` や `goimports` と同じように `-w` を指定します.
-```shell
+```
 $goconvcase -w --from us --to uc .\sample.go
 ```
 
 指定可能な全てのケースを知りたい場合は `--list` を指定してください.
 
-```shell
+```
 $goconvcase --list
 us : UPPER_SNAKE_CASE like this.
 uc : UpperCamelCase like this.
