@@ -1,26 +1,35 @@
-# Go �ŃR�[�h���`(Beautifire)�c�[�������
+# Go でコード整形(Beautifire)ツールを作る
+前回の記事では作成した Go の識別子ケース変換ツール [goconvcase][1] の紹介を取り上げました.
+その際に使用したパッケージや手法などはそれ以外の所謂 Beautifire や Formatter のような Go 向けの
+コード整形ツールを作成する際に使用できるイディオムかと思いました.
+本記事では Go で Go のコード整形ツールを作成した際の手順をまとめます.
 
-## �L���̖ړI
-* Go �p�̎��ʎq�P�[�X�ϊ��c�[���������
-* ���̑��̃R�[�h���`�c�[���̍쐬�ɂ��g����C�f�B�I���̂��߂܂Ƃ߂�
+## 整形ツール作成の流れ
+コードを整形するツールの処理フローは以下になるかと思います.
+1. ソースをパースしデータ(AST)化する
+1. パースしたデータを更新する
+1. 更新したデータをソースに戻す
 
-## ���`�c�[���쐬�̗���
-* go/parser, go/ast, go/format ���g��
-    * go/parser �Ń\�[�X���p�[�X
-    * go/ast �Ń\�[�X���X�V
-    * go/format �� AST ���\�[�X�ɖ߂�
-* DFD �Ő�������
+* DFD で説明する
 
-## �쐬����c�[���̎d�l
-* �\�[�X�̃X�l�[�N�P�[�X���L�������P�[�X�ɕϊ�����
+![DFD](https://github.com/kita127/kita127-blog/blob/master/20200708_creating_beautifire_in_go/images/go_bautifire.png)
 
-## �\�[�X���p�[�X����
-* go/parser ���g�p����
-* AST �̊ȒP�Ȑ���
+## 作成するツールの仕様
 
-## AST ���X�V����
-* go/ast ���g�p����
-* �g���o�[�X�֐��ōX�V����
+* ソースのスネークケースをキャメルケースに変換する
 
-## AST ���\�[�X�ɖ߂�
-* go/format �Ń\�[�X�ɖ߂�
+## ソースをパースする
+
+* go/parser を使用する
+* AST の簡単な説明
+
+## AST を更新する
+
+* go/ast を使用する
+* トラバース関数で更新する
+
+## AST をソースに戻す
+
+* go/format でソースに戻す
+
+[1]:https://kita127.hatenablog.com/entry/2020/06/27/141442
