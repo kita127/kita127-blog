@@ -12,7 +12,7 @@
 
 * DFD で説明する
 
-![DFD](https://github.com/kita127/kita127-blog/blob/master/20200708_creating_beautifire_in_go/images/go_bautifire.png)
+![DFD][2]
 
 ## 作成するツールの仕様
 
@@ -33,3 +33,4 @@
 * go/format でソースに戻す
 
 [1]:https://kita127.hatenablog.com/entry/2020/06/27/141442
+[2]:https://github.com/kita127/kita127-blog/blob/master/20200708_creating_beautifire_in_go/images/go_bautifire.png
