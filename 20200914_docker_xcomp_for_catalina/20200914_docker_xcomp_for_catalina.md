@@ -1,3 +1,36 @@
-# Mac Catalina で 32bit gcc コンパイル
+# Mac Catalina で 32bit GCC コンパイル
 
-Mac Catalina で docker を使用して 32bit gcc クロススコンパイルをするための環境構築手順
+Mac Catalina で docker を使用して 32bit GCC クロススコンパイルをするための環境構築手順
+
+## 背景
+
+「30日でできる！OS自作入門」を Mac Catalina で構築する際 32bit GCC のコンパイル環境構築でつまずいた
+
+もともと HomeBrew でインストールできた i386 向けの GCC コンパイラ `i386-elf-gcc` が 2020/09/14 現在インストールできない
+
+GCC の自前ビルドも試したがどうもうまくいかない
+
+GCC ビルドに必要なライブラリやツール類がそもそもインストールできない
+
+どうも Catalina が 32bit 向けツールを非推奨としているながれっぽい
+
+`x86_64-elf-gcc` で 32bit 向けにコンパイルするオプションで試みるも、Bad CPU みたいなエラーとなり怒られる
+
+## 解決方法
+
+docker 上に ubuntu コンテンナを作成し、そこに 32bit 向け GCC ビルド環境を構築。
+そこでコンパイルおよびビルドすることで対応
+
+## やりかた
+
+1. Mac に docker をインストールする
+    * この記事では扱わない
+1. DockerHub から ubuntu のイメージファイルを pull する
+1. ubuntu のコンテナを生成する
+1. ubuntu コンテナ上で GCC をインストールする
+1. コンパイルに必要なリンカスクリプトなどを ubuntu に渡す
+1. 環境構築した ubuntu コンテナから新たにイメージファイルを作成する
+1. ubuntu で コンパイルする
+    1. ubuntu に `docker cp` でコンパイルしたい C ソースを渡す
+    1. ubuntu でコンパイルする
+    1. コンパイルしたファイルを ubuntu コンテナから回収する
