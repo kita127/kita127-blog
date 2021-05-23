@@ -93,10 +93,37 @@ $ node -v
 v16.0.0
 ```
 
-
-### Node.js の説明
-
 ### Express の導入
+
+Express プロジェクトの雛形を生成するツール express-generator をグローバル環境に導入する.
+```bash
+$ npm install express-generator -g
+```
+
+Express プロジェクトの雛形を作成する.
+以下のコマンドでテンプレートファイルに ejs を指定し, `project-name` で Express プロジェクトの雛形を作成する.
+```bash
+$ express -v ejs project-name
+```
+
+作成したプロジェクトフォルダに移動すし, 依存パッケージをインストールする.
+```bash
+$ cd ./project-name
+$ npm install
+```
+
+作成したプロジェクトを試しに動かしてみる.
+```bash
+$ npm start
+```
+
+ブラウザから `http://localhost:3000` にアクセスする.
+以下が表示されることを確認する.
+
+    Express
+    Welcom to Express
+
+
 ### Express の説明
 
 ### Sequelize の導入
