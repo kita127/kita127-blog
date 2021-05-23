@@ -123,8 +123,62 @@ $ npm start
     Express
     Welcom to Express
 
-
 ### Express の説明
+
+#### Express の使い方
+
+routes/ フォルダに任意の url にアクセスした際の制御を記述する.
+
+以下はrouter/hoge.js を作成し `http://localhost:3000/hoge` にアクセスした際の制御.
+res.render() の第一引数にレンダリングする ejs ファイルを指定する.
+第二引数には ejs ファイルに渡すオブジェクトを指定する.
+
+```js
+var express = require('express');
+var router = express.Router();
+
+router.get('/', function(req, res, next) {
+    res.render('hoge', { title: 'hoge' });
+});
+
+module.exports = router;
+```
+
+レンダリングする ejs ファイルを view フォルダに作成する.
+
+view/hoge.ejs を以下の通り作成.
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+  </body>
+</html>
+```
+
+app.js に以下の設定を追加する.
+以下の設定で作成した hoge.js が URL /hoge と紐づく.
+以下の設定により /hoge が hoge.js におけるルートとなるため `router.get('/', ....)` の記述で
+`http://localhost:3000/hoge` にアクセスした場合の処理の記述となる.
+
+```js
+// 作成したルータ hoge.js を require する
+var hogeRouter = require('./routes/hoge');
+
+    .
+    .
+    .
+
+// 作成した hogeRouter に URL を紐付ける
+app.use('/hoge', hogeRouter);
+```
+
+
 
 ### Sequelize の導入
 ### Sequelize の説明
