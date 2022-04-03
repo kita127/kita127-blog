@@ -2,14 +2,17 @@
 
 ## 記事の内容
 
-犬の様子を動画で記録して, 出先のスマホから確認したい. 
+自宅にいる犬の様子を外出先からでもリアルタイムで見てみたいと思い
+システムを Raspberry Pi で構築してみました. 
 
-犬の様子を動画で記録した, スマホなどからリアルタイムの様子を動画で確認できるシステムを作成. 
+Raspberry Pi に犬の様子の撮影と, 動画配信サーバーをやらせます. 
 
-全2回に分けて記事を作成. 
+動画配信サーバーには MJPG-streamer, ネットワークの構築にはお手軽に VPN を構築できる Tailscale
+を使用しました. 
 
-今回は Raspberry Pi の環境構築までの覚書. 
+犬監視システムの構築手順の覚書を全2回に分けて記事にします. 
 
+1回目は Raspberry Pi の導入とリモート接続するまでをまとめました. 
 
 ## モノ
 
@@ -45,9 +48,9 @@ Raspberry Pi にはデフォルトでリモートデスクトップソフトで�
 1. 「インターフェース」タブを選択
 1. VNC を有効にする
 
-VNC のセキュリティ設定を変更しておかないと Mac の VNCクライアントから接続できないため, 設定変更する. 
+また, VNC のセキュリティ設定を変更しておかないと Mac の VNCクライアントから接続できないため, そちらも設定変更しておく. 
 
-以下を参考にさせていただきました. 
+以下を参考にさせていただきました.<br>
 https://qiita.com/karaage0703/items/9650e7aeceb6e1b81612#comment-467f53a421bea472cf81
 
 1. ラズパイ画面右上に表示されている `V2` をクリック
@@ -88,10 +91,10 @@ terminal から `ssh pi@raspberrypi.local` で接続.
 このままだと, Raspberry Pi がディスプレイに接続された状態でないと VNC 接続できないため, 
 ディスプレイに接続されていない状態でも接続できるように設定を変更する. 
 
-以下を参考にさせていただきました. 
+以下を参考にさせていただきました.<br>
 https://algorithm.joho.info/raspberry-pi/cannot-currently-show-the-desktop-raspberry-pi/
 
-1. 以下のコマンドを実行し設定ファイルを開く
+1. Raspberry Pi で以下のコマンドを実行し設定ファイルを開く
     * `sudo nano /boot/config.txt`
         * エディタは `vi` とかもある
 1. `#hdmi_force_hotplug=1` のコメントアウトをはずし `hdmi_force_hotplug=1` に変更する
@@ -102,6 +105,7 @@ https://algorithm.joho.info/raspberry-pi/cannot-currently-show-the-desktop-raspb
 ### 解像度の設定をする
 
 このままだと, 解像度があっていないため変更する. 
+Raspberry Pi 側で以下の設定をする. 
 
 1. terminal を起動
 1. `raspi-cofig` を入力
@@ -109,7 +113,13 @@ https://algorithm.joho.info/raspberry-pi/cannot-currently-show-the-desktop-raspb
 1. Resoltion
 1. DMT Mode 82 1920x1080
 1. `sudo nano /boot/config.txt`
-1. 以下の設定となっていることを確認する
+1. 以下コードの設定となっていることを確認する
+1. 解像度の変更
+    1. Raspberry Pi のデスクトップ画面で
+    1. メニュー ｰ> 設定 ｰ> `Screen Configuration`
+    1. `Configure` -> Screens -> `HDMI-1` -> `解像度` -> `1920x1080`
+    1. `Configure` -> 適用
+
 ```
 # uncomment if hdmi display is not detected and composite is being output
 hdmi_force_hotplug=1
@@ -118,10 +128,9 @@ hdmi_force_hotplug=1
 hdmi_group=2
 hdmi_mode=82
 ```
-1. 解像度の変更
-    1. Raspberry Pi のデスクトップ画面で
-    1. メニュー ｰ> 設定 ｰ> `Screen Configuration`
-    1. `Configure` -> Screens -> `HDMI-1` -> `解像度` -> `1920x1080`
-    1. `Configure` -> 適用
 
-以上
+### 環境構築完了
+
+ここまでの設定で Raspberry Pi を VNC と SSH で接続できる環境が整う. 
+
+次回, 動画ストリーミングサーバーの構築と VPN ネットワークの構築. 
