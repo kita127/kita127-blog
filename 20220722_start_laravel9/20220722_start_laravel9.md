@@ -87,4 +87,26 @@ alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
 * コンテナから出る
     * `$ exit`
 
+### コンテナ環境のカスタマイズ
+
+コンテナ設定のための Dockerfile の更新方法について. 
+
+#### カスタマイズ用の Dockerfile の作成
+
+以下のコマンドを実行する
+
+```
+$ sail artisan sail:publish
+```
+
+アプリケーションルート(プロジェクトのトップディレクトリ)に `docker/` ディレクトリが作成される. <br>
+`docker/` ディレクトリ内には各バージョンごとのフォルダ(8.0, 8.1 など)が作られる. <br>
+適用されるバージョンは `docker-compose.yml` の `services.laravel.test.build.context`
+に設定されているバージョンのディレクトリ内 Dockerfile が使用される。
+
+
+
+
+
+
 
