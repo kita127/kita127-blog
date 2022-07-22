@@ -73,4 +73,11 @@ alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
 .bashrc 更新後は `$ source .bashrc` で更新内容を反映する. <br>
 以降は `sail up` で実行可能. <br>
 
+### Sail のデーモン起動と終了
+
+* Sail のデーモン起動
+    * `$ sail up -d`
+* Sail の終了
+    * `$ sail down`
+
 
