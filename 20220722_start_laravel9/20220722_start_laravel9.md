@@ -102,11 +102,17 @@ $ sail artisan sail:publish
 アプリケーションルート(プロジェクトのトップディレクトリ)に `docker/` ディレクトリが作成される. <br>
 `docker/` ディレクトリ内には各バージョンごとのフォルダ(8.0, 8.1 など)が作られる. <br>
 適用されるバージョンは `docker-compose.yml` の `services.laravel.test.build.context`
-に設定されているバージョンのディレクトリ内 Dockerfile が使用される。
+に設定されているバージョンのディレクトリ内 Dockerfile が使用される. <br>
 
+この Dockerfile を変更することでコンテナ環境をカスタマイズできる.
 
+#### 更新した Dockerfile の反映
 
+Dockerfile 更新後は以下のコマンドで再ビルドする. 
 
+```
+$ sail build --no-cache
+```
 
 
 
