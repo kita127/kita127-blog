@@ -80,4 +80,11 @@ alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
 * Sail の終了
     * `$ sail down`
 
+### コンテナに入る
+
+* コンテナに入る
+    * `$ sail shell`
+* コンテナから出る
+    * `$ exit`
+
 
