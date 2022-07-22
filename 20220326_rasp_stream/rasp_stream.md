@@ -40,7 +40,7 @@ Raspberry Pi のカメラ設定はこの記事では扱いません.
 
 ```
 $ sudo apt install -y build-essential imagemagick libv4l-dev libjpeg-dev cmake
-````
+```
 
 2. MJPG-streamer を GitHub から clone し, make する
 
@@ -142,7 +142,7 @@ Authorization successful が表示されれば OK.
 確認した IP アドレスで Raspberry Pi にアクセスできることを確認する. 
 
 ```
-http://<Raspberry Pi の IP>:8080
+http://<Raspberry PiのIP>:8080
 ```
 
 ## 終わり
