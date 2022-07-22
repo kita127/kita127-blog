@@ -48,4 +48,11 @@ $ curl -s "https://laravel.build/sample-project?php=81" | bash
 
 ### コンテナを起動する
 
+Sail を実行しコンテナ上のサーバーを起動する. 
+
+1. 作成したプロジェクトに移動する
+2. `$ ./vendor/bin/sail up` を実行する
+
+初回 Sail 実行時は Docker イメージのインストールなどで時間がかかる. 
+
 
