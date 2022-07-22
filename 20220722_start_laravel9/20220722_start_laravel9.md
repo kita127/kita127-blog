@@ -108,11 +108,23 @@ $ sail artisan sail:publish
 
 #### 更新した Dockerfile の反映
 
-Dockerfile 更新後は以下のコマンドで再ビルドする. 
+Dockerfile 更新後は以下のコマンドで Docker イメージを再ビルドする. 
 
 ```
 $ sail build --no-cache
 ```
 
+#### タイムゾーンを変更する
 
+デフォルトではコンテナのタイムゾーンが UTC となっているため日本時間に変更する. <br>
+`docker/x.x/Dockerfile` を以下の通り変更する. 
+
+* 変更前
+    * `ENV TZ=UTC`
+* 変更後
+    * `ENV TZ='Asia/Tokyo'`
+
+更新後は Docker イメージをビルドする. <br>
+
+`sail shell` でコンテナ内に入り `date` コマンドで日本時間(JST)になっていることを確認する. 
 
