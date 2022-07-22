@@ -58,3 +58,19 @@ Sail を実行しコンテナ上のサーバーを起動する.
 初回 Sail 実行時は Docker イメージのインストールなどで時間がかかる. <br>
 以降は `$ ./vendor/bin/sail up` をすることでコンテナ上のサーバが起動しブラウザからアクセスできる. <br>
 
+### Sail のエイリアスを設定する
+
+いちいち `$ ./vendor/bin/sail up` を入力するのは手間なのでエイリアスを設定する. <br>
+.bashrc などの rc ファイルに以下を追記する. <br>
+
+```
+alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
+
+# テストコマンドで sail ファイルがカレントにあるかチェックし， あれば `bash sail` を実行.
+# なければ `vendor/bin/sail を実行する.
+```
+
+.bashrc 更新後は `$ source .bashrc` で更新内容を反映する. <br>
+以降は `sail up` で実行可能. <br>
+
+
