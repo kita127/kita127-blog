@@ -1,4 +1,4 @@
-# Laravel まとめ
+# Laravel : まとめ
 
 Laravel ノウハウまとめ記事. 
 
@@ -14,7 +14,7 @@ Laravel 9 でのプロジェクトの作成方法や初期環境設定につい�
 
 クラアントから GET リクエストを受け取り HTML を返す一連の流れの構築方法について記載. 
 
-* 記事の URL
+* https://kita127.hatenablog.com/entry/2022/07/27/100817
 * Laravel バージョン 9
 
 ## MySQL にテーブル作成
