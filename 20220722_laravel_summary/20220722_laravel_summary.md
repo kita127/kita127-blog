@@ -29,3 +29,15 @@ Laravel の機能を使用し MySQL データベースにテーブルを作成�
 
 * https://kita127.hatenablog.com/entry/2022/07/27/125906
 * Laravel バージョン 9
+
+## 入力のバリデーション
+
+POST メソッドの実装と入力のバリデーションについて
+
+* 記事の内容
+    * POST メソッド
+    * バリデーション
+    * Route に名前をつける
+
+* https://kita127.hatenablog.com/entry/2022/07/28/183004
+* Laravel バージョン 9
