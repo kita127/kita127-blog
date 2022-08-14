@@ -182,7 +182,7 @@ $sail artisan make:request Image/CreateRequest.php
 ```
 
 CreateRequest.php が生成されるので編集する. <br>
-`authorize` はシステムに合わせて適宜編集. <br>
+`authorize` はログインを要求するか否かの設定. システムに合わせて適宜編集. <br>
 `rules` にバリデーションルールを追加. `name` が `image` の要素に対して
 「必須」「画像」「拡張子」「サイズ」のルールを追加. <br>
 
@@ -335,7 +335,7 @@ class ImageService
 ### GET 用のコントローラに画像取得処理追加
 
 GET 用のコントローラに DB から画像のファイル名を取得する処理を追加. <br>
-取得した画像を Blade に渡す. <br>
+取得した画像のファイル名を Blade に渡す. <br>
 
 `app/Http/Controllers/Image/ImageController.php`
 ```php
@@ -402,3 +402,5 @@ class IndexController extends Controller
     </div>
 </x-layout>
 ```
+
+以上で `http://localhost/image` にアクセスするとアップロードした画像が表示される. <br>
