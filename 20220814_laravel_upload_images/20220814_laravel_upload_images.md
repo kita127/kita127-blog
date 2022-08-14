@@ -404,3 +404,30 @@ class IndexController extends Controller
 ```
 
 以上で `http://localhost/image` にアクセスするとアップロードした画像が表示される. <br>
+
+
+## 画像の削除
+
+画像の消去は以下. <br>
+
+```php
+
+use App\Models\Image;
+use Illuminate\Support\Facades\Storage;
+
+
+...省略
+
+// 対象画像のモデルを取得
+$image = Image::where('id', $imageId)->firstOrFail();
+
+$filePath = 'public/images' . $image->name;
+// ファイルをストレージから削除
+if (Storage::exists($filePath)) {
+    Storage::delete($filePath);
+}
+
+// DB から対象の画像を削除
+$image->delete();
+
+```
