@@ -83,6 +83,8 @@ Docker コンテナを利用し, 各コンテナを連携させる構成とす�
 
 ### Docker の構築
 
+#### docker-compose.yaml の作成
+
 Webサーバと DB のコンテナを作成する設定をつくる. [構成](#構成)に記載の `docker-compose.yaml` を以下の通り作成. 
 
 ```yaml
@@ -133,8 +135,8 @@ networks:
     * `build`
         * ビルド時の設定
         * `context`
-            * ビルドする際のビルドコンテキストをトップディレクトリとする
-            * イメージがビルドされる際のカレントディレクトリを決める
+            * ビルドする際のビルドコンテキストをプロジェクトトップとする
+            * コンテナがビルドされる際のカレントディレクトリを決める
             * Dockerfile にパスを記述する際の基準となるパス
                 * 相対パスを記述する際はプロジェクトトップがカレントとなる
     * `dockerfile`
@@ -146,7 +148,7 @@ networks:
             * root ユーザへの Composer インストールを許可するとのこと
             * Do not run xxx のような警告が出るらしくそれを抑えるため設定
     * `volumes`
-        * Laravel プロジェクトを `apache` コンテナの `/var/www/html` にマウント
+        * Laravel プロジェクト(`webapp/`)を `apache` コンテナの `/var/www/html` にマウント
     * `depends_on`
         * Laravel から DB にアクセスするため `db` コンテナの起動後に `apache` コンテナを起動する
         * なくても大丈夫な気もする・・・
@@ -164,6 +166,42 @@ networks:
 * `networks.net1`
     * `apache` コンテナと `db` コンテナで通信するためのネットワークを定義
 
+#### apache コンテナの Dockerfile の作成
+
+`プロジェクトトップ/docker/apache/` に以下の `apache` コンテナ用の Dockerfile を作成する. 
+
+```Dockerfile
+FROM php:8.1-apache-bullseye
+
+# apt install iputils-ping net-tools で ping を導入
+RUN apt-get update \
+ && apt-get install -y zlib1g-dev libzip-dev unzip vim iputils-ping net-tools\
+ && docker-php-ext-install zip
+
+# a2emod rewrite をして apache に rewrite モジュールを追加
+# これをしないと Laravel でルート以外にアクセスできない
+RUN a2enmod rewrite
+
+# docker php には mysql 用のドライバが未インストールのため追加する
+RUN docker-php-ext-install pdo_mysql
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+ADD docker/apache/php.ini /usr/local/etc/php/
+ADD docker/apache/config/000-default.conf /etc/apache2/sites-enabled/
+
+WORKDIR /var/www/html
+
+COPY ./webapp /var/www/html
+
+RUN chown www-data storage/ -R \
+ && composer install
+```
+
+* `FROM`
+    * 元となる Docker イメージの指定
+    * Docker Hub の php イメージ, `8.1-apache-bullseye` タグを指定
+        * https://hub.docker.com/layers/library/php/8.1-apache-bullseye/images/sha256-fcee566dcc5d4debf4bd46d11cddaf5eac3dc964eef465325bc4b073d0bf647c?context=explore
 
 ### Web サーバ(Apache)の確認
 
