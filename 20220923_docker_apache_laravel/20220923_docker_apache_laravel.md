@@ -201,9 +201,36 @@ RUN chown www-data storage/ -R \
 * `FROM`
     * 元となる Docker イメージの指定
     * Docker Hub の php イメージ, `8.1-apache-bullseye` タグを指定
-        * https://hub.docker.com/layers/library/php/8.1-apache-bullseye/images/sha256-fcee566dcc5d4debf4bd46d11cddaf5eac3dc964eef465325bc4b073d0bf647c?context=explore
+        * [タグlink](https://hub.docker.com/layers/library/php/8.1-apache-bullseye/images/sha256-fcee566dcc5d4debf4bd46d11cddaf5eac3dc964eef465325bc4b073d0bf647c?context=explore)
+    * `8.1-apache-bullseye` は Debian Apache に `mod_php` が含まれたタグ
+        * bullseye は Debian の v11 に対するコードネームとのこと
+        * https://hub.docker.com/_/php
+* `RUN apt-get update ....`
+    * コンテナ起動時にパッケージ情報のアップデートと必要なパッケージをインストール
+    * `iputils-ping` と `net-tools`
+    * `ping` を利用するためのインストール
+    * `docker-php-ext-install zip`
+        * PHP 拡張をインストールするためのヘルパスクリプトとのこと
+        * 詳細は Docker Hub の PHP イメージページを参照
+            * https://hub.docker.com/_/php
+* `RUN a2enmod rewrite`
+    * Apache に `rewrite` モジュールを追加する
+    * Laravel でのルーティングにはこのモジュールの有効化が必要
+* `RUN docker-php-ext-install pdo_mysql`
+    * Docker の PHP コンテナには MySQL 用のドライバがインストールされていないため追加する
+* `COPY --from=composer:latest /usr/bin/composer /usr/bin/composer`
+    * composer:latest イメージをビルドし作成した `composer` の実行形式をコンテナの `/usr/bin/composer` にコピーしているぽい
+    * `COPY --from=name src dest`
+        * `FROM <image> as <name>` として名前をつけて構築したイメージをコピー元として指定できる
+        * `composer:latest` を指定しているので名前つけをしたステージ以外にも image を直接指定もできるぽい？
+        * 詳細は Docker Hub の Composer イメージのページや Dockerfile リファレンスの `COPY` を参照
+            * [COPYのリファレンス](https://docs.docker.jp/engine/reference/builder.html#copy)
+            * [Composerイメージのページ](https://hub.docker.com/_/composer)
+
 
 ### Web サーバ(Apache)の確認
+
+* `pdo_mysql` が有効化確認する
 
 ### DB(MySQL)の確認
 
