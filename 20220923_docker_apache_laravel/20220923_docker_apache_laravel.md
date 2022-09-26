@@ -188,7 +188,11 @@ RUN docker-php-ext-install pdo_mysql
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 ADD docker/apache/php.ini /usr/local/etc/php/
-ADD docker/apache/config/000-default.conf /etc/apache2/sites-enabled/
+
+# Apache の conf は seites-available に作成し
+# a2ensite コマンドでシンボリックリンクを sites-enabled に作成する
+ADD docker/apache/config/000-default.conf /etc/apache2/sites-available/
+RUN a2ensite 000-default
 
 WORKDIR /var/www/html
 
@@ -226,7 +230,27 @@ RUN chown www-data storage/ -R \
         * 詳細は Docker Hub の Composer イメージのページや Dockerfile リファレンスの `COPY` を参照
             * [COPYのリファレンス](https://docs.docker.jp/engine/reference/builder.html#copy)
             * [Composerイメージのページ](https://hub.docker.com/_/composer)
-
+* `ADD docker/apache/php.ini /usr/local/etc/php/`
+    * PHP の設定ファイル(`php.ini`)をコンテナの然るべき場所に置く
+* `ADD docker/apache/config/000-default.conf /etc/apache2/sites-available/`
+* `RUN a2ensite 000-default`
+    * Apache のコンフィグファイル(`000-default.conf`)を `sites-available` に置く
+    * 大元のコンフィグファイルである `apache2.conf` では `sites-enabled` のみ `IncludeOptional` ディレクティブにより有効化される
+    * `sites-available` に置いたコンフィグファイルのシンボリックリンクを `sites-enabled` 置くことによりコンフィグを有効にする
+    * シンボリックリンクの作成は直接作成して `sites-enabled` においても構わないが, `a2ensite` コマンドで作成可能
+    * https://nanbu.marune205.net/2021/12/debian-apache2-dir.html
+* `WORKDIR /var/www/html`
+    * 作業ディレクトリを `/var/www/html` に指定
+    * `RUN` や `CMD` 実行時のディレクトリとなる
+    * コンテナ内に入った時もここがワーキングディレクトリになる？
+* `COPY ./webapp /var/www/html`
+    * Web アプリケーション(Laravelプロジェクト)をコンテナの `/var/www/html` にコピーする
+* `RUN chown www-data storage/ -R \`
+    * `www-data` は Apache がデフォルトで通常操作に使用するユーザー
+    * `www-data` がアクセスできるファイルに Apache もアクセスできる
+    * Laravel プロジェクトの `storage` フォルダ以下の所有者を `www-data` に変更する
+* `composer install`
+    * `composer.lock` の内容でパッケージをインストール
 
 ### Web サーバ(Apache)の確認
 
