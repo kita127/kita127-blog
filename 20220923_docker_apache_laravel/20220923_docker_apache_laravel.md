@@ -8,6 +8,9 @@ Laravel 製の Web アプリケーションを作成し, 自宅サーバ PC に�
 デプロイ作業を楽にしたい&環境構築とかでカオスになりたくないため Web サーバーやデータベースは
 Docker コンテナを利用し, 各コンテナを連携させる構成とする. 
 
+Docker コンテナを利用した Laravel 開発には Sail があるが, Apache への載せ替え方がわからなかったのと, 
+Docker の勉強も兼ねてコンテナ連携の構築から自前で作成する. 
+
 また, 自身の勉強も兼ねているため各技術要素についてなるべく詳細に残していく予定. 
 
 ## 要件
@@ -212,7 +215,7 @@ RUN chown www-data storage/ -R \
 * `RUN apt-get update ....`
     * コンテナ起動時にパッケージ情報のアップデートと必要なパッケージをインストール
     * `iputils-ping` と `net-tools`
-    * `ping` を利用するためのインストール
+        * `ping` を利用するためのインストール
     * `docker-php-ext-install zip`
         * PHP 拡張をインストールするためのヘルパスクリプトとのこと
         * 詳細は Docker Hub の PHP イメージページを参照
@@ -225,7 +228,7 @@ RUN chown www-data storage/ -R \
 * `COPY --from=composer:latest /usr/bin/composer /usr/bin/composer`
     * composer:latest イメージをビルドし作成した `composer` の実行形式をコンテナの `/usr/bin/composer` にコピーしているぽい
     * `COPY --from=name src dest`
-        * `FROM <image> as <name>` として名前をつけて構築したイメージをコピー元として指定できる
+        * `FROM <image> as <name>` として名前をつけて構築したステージをコピー元として指定できる
         * `composer:latest` を指定しているので名前つけをしたステージ以外にも image を直接指定もできるぽい？
         * 詳細は Docker Hub の Composer イメージのページや Dockerfile リファレンスの `COPY` を参照
             * [COPYのリファレンス](https://docs.docker.jp/engine/reference/builder.html#copy)
@@ -234,9 +237,9 @@ RUN chown www-data storage/ -R \
     * PHP の設定ファイル(`php.ini`)をコンテナの然るべき場所に置く
 * `ADD docker/apache/config/000-default.conf /etc/apache2/sites-available/`
 * `RUN a2ensite 000-default`
-    * Apache のコンフィグファイル(`000-default.conf`)を `sites-available` に置く
+    * `docker/apache/config` にある Apache のコンフィグファイル(`000-default.conf`)を `sites-available` に置く
     * 大元のコンフィグファイルである `apache2.conf` では `sites-enabled` のみ `IncludeOptional` ディレクティブにより有効化される
-    * `sites-available` に置いたコンフィグファイルのシンボリックリンクを `sites-enabled` 置くことによりコンフィグを有効にする
+    * `sites-available` に置いたコンフィグファイルのシンボリックリンクを `sites-enabled` に置くことによりコンフィグを有効にする
     * シンボリックリンクの作成は直接作成して `sites-enabled` においても構わないが, `a2ensite` コマンドで作成可能
     * https://nanbu.marune205.net/2021/12/debian-apache2-dir.html
 * `WORKDIR /var/www/html`
