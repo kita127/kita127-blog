@@ -346,21 +346,157 @@ $ composer create-project laravel/laravel webapp
 作成した `webapp` に移動し, `$ php artisan serve` を実行し Laravel のサーバを起動. 
 ブラウザから `http://localhost:8000` でアクセスし Laravel のデフォルトページが表示されるか確認する. 
 
-#### マイグレーションファイル作成
+#### Laravel から DB にアクセスする準備
 
+とりあえず, db コンテナと連携できるかの確認のため捨てテーブルを作る. 
 テーブル生成用のマイグレーションファイルを作成する. 以下のコマンドを実行. 
 
-`$ sail artisan make:migration create_hoges_table`
+`$ php artisan make:migration create_hoges_table`
 
 `database/migrations/yyyy_mm_dd_xxxx_create_hoges_table.php` が生成される. 
 
+確認用なのでとりあえずデフォルトのままでOK. 
 
+Eloqent モデルを作成する. 
+
+`$ php artisan make:model Hoge`
+
+`webapp/app/Models/Hoge.php` が作成される. 
+
+次にコントローラを以下のコマンドで作成. 
+
+`$ php artisan make:controller HogeController --invokable`
+
+`webapp/app/Http/Controllers/HogeDir/HogeController.php` が作成される. 
+
+とりあえず動作確認のため, hoges テーブルからレコードを取得し先頭要素の id をビューに渡すだけの処理を実装. 
+
+```php
+<?php
+
+namespace App\Http\Controllers\HogeDir;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Hoge;
+
+class HogeController extends Controller
+{
+    /**
+     * Handle the incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function __invoke(Request $request)
+    {
+        $ls = Hoge::all();
+        return view('hoge.index', ['hoge' => $ls[0]->id]);
+    }
+}
+```
+
+`webapp/resources/views/hoge/index.blade.php` を作成する. これも確認のためだけなので $hoge を表示する簡易な表示のみ. 
+
+```blade
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0,
+          maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>アプリタイトル</title>
+</head>
+
+<body>
+    <h1>アプリボディ</h1>
+    <p>{{ $hoge }}</p>
+</body>
+
+</html>
+```
+
+#### .env の変更
+
+`.env` は DB に関する設定だけ以下の通り変更する. 
+`DB_HOST` にはデータベースサーバの IP を設定するが, Docker のネットワーク内であれば
+コンテナ名で名前解決されるため, `db` で OK. ただし, ホストからはコンテナ名では IP の名前解決はできないため
+ホストで動かした Laravel からは DB にはアクセスできない. `docker-compose.yaml` で別途コンテナに IP アドレスを
+付与してやり, そちらを `DB_HOST` に設定すればホストで動かした Laravel からでも DB にアクセスできる気がするが, 
+基本的に apache コンテナで動かすつもりなので今の所やらない. 
+
+
+```
+
+...
+
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=master
+DB_USERNAME=root
+DB_PASSWORD=secret
+
+...
+
+```
 
 ### Web サーバ(Apache)の確認
 
-* `pdo_mysql` が有効化確認する
+ここまでで準備が整ったのでそれぞれのコンテナの動作確認をする. 
+
+まずはコンテナを生成するためプロジェクトトップで以下のコマンドを実行. 
+`-d` でデーモン起動(detachの略らしいけど). 
+
+```
+$ docker-compose up -d
+```
+
+ブラウザで `http://localhost:80/` にアクセスし Laravel のページが表示されれば問題なく
+`apache` コンテナが起動していることを確認できる. 
 
 ### DB(MySQL)の確認
 
-### Laravel プロジェクトの作成
+Laravel から DB にアクセスできるか確認する. 
+
+そのまえに, DB アクセスのための下準備が完了していないためそちらを終わらせる. 
+
+まず, `master` スキーマが生成されていることを確認する.  `db` コンテナに入る. 
+
+```
+$ docker-compose exec db bash
+```
+
+以下のコマンドを実行. `docker-compose.yaml` に設定しているパスワードを入力する. 
+
+```
+# mysql -u root -p
+# パスワードを入力
+```
+
+`show databases;` で `master` スキーマが生成されていることを確認する. 
+
+`exit;` し mysql を終了し, さらに `exit` しコンテナからも出る. 
+
+
+次に今度は `apache` コンテナに入る. 
+
+```
+$ docker-compose exec apache bash
+```
+
+まずは `apache` コンテナで MySQL 用のドライバがインストールされているか確認する. 
+以下の通り `pdo_mysql` が確認できれば OK. 
+
+```
+$ php -m | grep mysql
+mysqlnd
+pdo_mysql
+```
+
+
+
 
