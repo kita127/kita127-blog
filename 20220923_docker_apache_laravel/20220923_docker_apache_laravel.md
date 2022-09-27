@@ -169,6 +169,57 @@ networks:
 * `networks.net1`
     * `apache` コンテナと `db` コンテナで通信するためのネットワークを定義
 
+
+#### Apache のコンフィグファイルの作成
+
+Apache サーバのコンフィグファイル
+`プロジェクトトップ/docker/apache/config/000-default.conf` を以下の通り作成する. 
+
+```
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html/public
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+* `VirtualHost`
+    * バーチャルホストを実現するディレクティブ
+    * ひとつのサーバで複数のウェブサイトを提供する機能
+    * IP ベース, 名前ベース, ポートベースといくつかの実現方法がある
+    * 今回は複数のウェブサイトを提供したいわけではないため, 80 番ポートで受けるひとつの `VirtualHost` ディレクティブのみ
+    * 詳細は以下あたりを参照
+        * https://httpd.apache.org/docs/2.2/ja/vhosts/examples.html
+        * https://httpd.apache.org/docs/2.4/mod/core.html#virtualhost
+* `ServerAdmin`
+    * サーバがクライアントに送るエラーメッセージに含めるアドレス
+    * プライベートに使用するウェブサイトのため適当に設定
+* `ErrorLog`
+    * エラーログファイルの指定
+    * `APACHE_LOG_DIR` の環境変数は `/etc/apache2/envvars` に定義されている
+* `CustomLog`
+    * クライアントのアクセスログを記録するファイルとフォーマットを指定する
+    * 第2引数の `combined` は `LogFormat` ディレクティブで名前つけされたフォーマット
+        * `combined` は `apache2.conf` に以下の通り定義されている
+        * `LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined`
+    * 本ディレクティブは `mod_log_config` モジュールの機能
+
+#### php.ini の作成
+
+PHP の設定ファイル `プロジェクトトップ/docker/apache/php.ini` を以下の通り作成. 
+とりあえず, タイムゾーンと文字コードに関する設定だけ. 
+
+```
+[Date]
+date.timezone = "Asia/Tokyo"
+
+[mbstring]
+mbstring.internal_encoding = "UTF-8"
+mbstring.language = "Japanese"
+```
+
+
 #### apache コンテナの Dockerfile の作成
 
 `プロジェクトトップ/docker/apache/` に以下の `apache` コンテナ用の Dockerfile を作成する. 
@@ -254,6 +305,56 @@ RUN chown www-data storage/ -R \
     * Laravel プロジェクトの `storage` フォルダ以下の所有者を `www-data` に変更する
 * `composer install`
     * `composer.lock` の内容でパッケージをインストール
+
+
+#### db コンテナの Dockerfile の作成
+
+`プロジェクトトップ/docker/db/` に以下の `db` コンテナ用の Dockerfile を作成する. 
+
+```Dockerfile
+FROM mysql:8.0.30
+
+# docker-entrypoint-initdb.d にある SQL ファイルがコンテナ起動時に実行される
+COPY ./docker/db/initdb.d /docker-entrypoint-initdb.d
+```
+
+* `FROM mysql:8.0.30`
+    * MySQL イメージの `8.0.30` タグを使用する
+* `COPY ./docker/db/initdb.d /docker-entrypoint-initdb.d`
+    * `docker/db/initdb.d` フォルダをコンテナの `/docker-entrypoint-initdb.d` にコピーする
+    * `/docker-entrypoint-initdb.d` フォルダにある SQL ファイルがコンテナ起動時に実行される
+
+`プロジェクトトップ/docker/db/initdb.d/` に以下の `db` コンテナ起動時に実行される `master.sql` を格納する. 
+
+キャラクタ設定をして `master` スキーマを作成している. 
+
+```sql
+SET CHARACTER_SET_CLIENT = utf8;
+SET CHARACTER_SET_CONNECTION = utf8;
+
+CREATE DATABASE `master`;
+```
+
+### Laravel プロジェクトの作成
+
+プロジェクトトップで以下のコマンドを実行し Laravel プロジェクトを作成する. 
+
+```
+$ composer create-project laravel/laravel webapp
+```
+
+作成した `webapp` に移動し, `$ php artisan serve` を実行し Laravel のサーバを起動. 
+ブラウザから `http://localhost:8000` でアクセスし Laravel のデフォルトページが表示されるか確認する. 
+
+#### マイグレーションファイル作成
+
+テーブル生成用のマイグレーションファイルを作成する. 以下のコマンドを実行. 
+
+`$ sail artisan make:migration create_hoges_table`
+
+`database/migrations/yyyy_mm_dd_xxxx_create_hoges_table.php` が生成される. 
+
+
 
 ### Web サーバ(Apache)の確認
 
