@@ -464,13 +464,13 @@ Laravel から DB にアクセスできるか確認する.
 
 そのまえに, DB アクセスのための下準備が完了していないためそちらを終わらせる. 
 
-まず, `master` スキーマが生成されていることを確認する.  `db` コンテナに入る. 
+まず, `master` スキーマが生成されていることを確認する. `db` コンテナに入る. 
 
 ```
 $ docker-compose exec db bash
 ```
 
-以下のコマンドを実行. `docker-compose.yaml` に設定しているパスワードを入力する. 
+以下のコマンドを実行. `docker-compose.yaml` に設定している MySQL のパスワードを入力する. 
 
 ```
 # mysql -u root -p
@@ -479,17 +479,28 @@ $ docker-compose exec db bash
 
 `show databases;` で `master` スキーマが生成されていることを確認する. 
 
-`exit;` し mysql を終了し, さらに `exit` しコンテナからも出る. 
+```
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| master             |
+| mysql              |
+| ......             |
+| ......             |
+```
+
+`exit;` し mysql を終了, さらに `exit` しコンテナからも出る. 
 
 
-次に今度は `apache` コンテナに入る. 
+次に `apache` コンテナに入る. 
 
 ```
 $ docker-compose exec apache bash
 ```
 
 まずは `apache` コンテナで MySQL 用のドライバがインストールされているか確認する. 
-以下の通り `pdo_mysql` が確認できれば OK. 
+以下のコマンドを実行し `pdo_mysql` が確認できれば OK. 
 
 ```
 $ php -m | grep mysql
@@ -497,6 +508,64 @@ mysqlnd
 pdo_mysql
 ```
 
+Laravel プロジェクトをマウントしたディレクトリ(/var/www/html)に移動する(おそらくコンテナに入った時点でそのディレクトリのはず). 
+
+```
+$ pwd
+/var/www/html
+```
+
+マイグレーションを実行し `hoges` テーブルを作成する. 
+
+```
+$ php artisan migrate
+```
+
+`exit` し `apache` コンテナを出る. 再度, `db` コンテナに入る. 
+
+```
+$ docker-compose exec db bash
+```
+
+`hoges` テーブルが作成されていることを確認. 表示用のダミーデータを適当に追加する. 
+
+```
+$ mysql -u root -p
+パスワード入力
+
+mysql> use master;
+
+mysql> show tables;
++--------------------+
+| Tables_in_master   |
++--------------------+
+| ......             |
+| hoges              |
+| ......             |
+| ......             |
+| ......             |
 
 
+mysql> insert into hoges (id) values (1);
+
+mysql> select * from hoges;
++----+------------+------------+
+| id | created_at | updated_at |
++----+------------+------------+
+| 1  | NULL       | NULL       |
++----+------------+------------+
+```
+
+`db` コンテナから抜ける. 
+
+ブラウザから `http://localhost:80/hoge` にアクセスしテーブルに追加したレコードの id が表示されていることを確認できれば
+問題なく `apache` コンテナ上の Laravel から `db` コンテナの MySQL にアクセスできている. 
+
+
+以上で Docker + Apache + Laravel での最低限の環境が完成. 
+
+## その他
+
+* データベースへのアクセスをコマンドでやるとめんどくさいので自分は `Sequel Ace` 等の GUI アプリを使用している
+    * localhost の ポートフォワードしているポートから使用できる
 
