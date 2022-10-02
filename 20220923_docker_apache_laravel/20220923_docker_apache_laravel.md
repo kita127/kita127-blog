@@ -588,7 +588,8 @@ mysql> select * from hoges;
             * Compose ファイルで定義されていないコンテナも削除する
 * `apache` コンテナ内での `php artisan migrate` はホストから `docker exec` コマンドでも OK
     * `$ docker exec apache php artisan migrate`
-* データベースへのアクセスをコマンドでやるとめんどくさいので `Sequel Ace` 等の GUI アプリを使用すると吉
+* データベースへのアクセスをコマンドでやるとめんどくさいので GUI アプリを使用すると吉
+    * 自分は `Sequel Ace` を使用
     * localhost の ポートフォワードしているポートから使用できる
 
 ## 出典
