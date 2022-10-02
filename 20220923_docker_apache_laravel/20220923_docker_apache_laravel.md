@@ -147,7 +147,7 @@ networks:
             * ビルドする際のビルドコンテキストをプロジェクトトップとする
             * コンテナがビルドされる際のカレントディレクトリを決める
             * Dockerfile にパスを記述する際の基準となるパス
-                * 相対パスを記述する際はプロジェクトトップがカレントとなる
+                * この場合, 相対パスを記述する際はプロジェクトトップがカレントとなる
     * `dockerfile`
         * ビルド時の Dockerfile ファイルを指定
     * `ports`
@@ -174,56 +174,6 @@ networks:
     * 他の設定値については `services.apache` の内容を参照
 * `networks.net1`
     * `apache` コンテナと `db` コンテナで通信するためのネットワークを定義
-
-
-#### Apache のコンフィグファイルの作成
-
-Apache サーバのコンフィグファイル
-`プロジェクトトップ/docker/apache/config/000-default.conf` を以下の通り作成する. 
-
-```
-<VirtualHost *:80>
-        ServerAdmin webmaster@localhost
-        DocumentRoot /var/www/html/public
-        ErrorLog ${APACHE_LOG_DIR}/error.log
-        CustomLog ${APACHE_LOG_DIR}/access.log combined
-</VirtualHost>
-```
-
-* `VirtualHost`
-    * バーチャルホストを実現するディレクティブ
-    * ひとつのサーバで複数のウェブサイトを提供する機能
-    * IP ベース, 名前ベース, ポートベースといくつかの実現方法がある
-    * 今回は複数のウェブサイトを提供したいわけではないため, 80 番ポートで受けるひとつの `VirtualHost` ディレクティブのみ
-    * 詳細は以下あたりを参照
-        * https://httpd.apache.org/docs/2.2/ja/vhosts/examples.html
-        * https://httpd.apache.org/docs/2.4/mod/core.html#virtualhost
-* `ServerAdmin`
-    * サーバがクライアントに送るエラーメッセージに含めるアドレス
-    * プライベートに使用するウェブサイトのため適当に設定
-* `ErrorLog`
-    * エラーログファイルの指定
-    * `APACHE_LOG_DIR` の環境変数は `/etc/apache2/envvars` に定義されている
-* `CustomLog`
-    * クライアントのアクセスログを記録するファイルとフォーマットを指定する
-    * 第2引数の `combined` は `LogFormat` ディレクティブで名前つけされたフォーマット
-        * `combined` は `apache2.conf` に以下の通り定義されている
-        * `LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined`
-    * 本ディレクティブは `mod_log_config` モジュールの機能
-
-#### php.ini の作成
-
-PHP の設定ファイル `プロジェクトトップ/docker/apache/php.ini` を以下の通り作成. 
-とりあえず, タイムゾーンと文字コードに関する設定だけ. 
-
-```
-[Date]
-date.timezone = "Asia/Tokyo"
-
-[mbstring]
-mbstring.internal_encoding = "UTF-8"
-mbstring.language = "Japanese"
-```
 
 
 #### apache コンテナの Dockerfile の作成
@@ -311,6 +261,55 @@ RUN chown www-data storage/ -R \
     * Laravel プロジェクトの `storage` フォルダ以下の所有者を `www-data` に変更する
 * `composer install`
     * `composer.lock` の内容でパッケージをインストール
+
+#### Apache のコンフィグファイルの作成
+
+Apache サーバのコンフィグファイル
+`プロジェクトトップ/docker/apache/config/000-default.conf` を以下の通り作成する. 
+
+```
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html/public
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+* `VirtualHost`
+    * バーチャルホストを実現するディレクティブ
+    * ひとつのサーバで複数のウェブサイトを提供する機能
+    * IP ベース, 名前ベース, ポートベースといくつかの実現方法がある
+    * 今回は複数のウェブサイトを提供したいわけではないため, 80 番ポートで受けるひとつの `VirtualHost` ディレクティブのみ
+    * 詳細は以下あたりを参照
+        * https://httpd.apache.org/docs/2.2/ja/vhosts/examples.html
+        * https://httpd.apache.org/docs/2.4/mod/core.html#virtualhost
+* `ServerAdmin`
+    * サーバがクライアントに送るエラーメッセージに含めるアドレス
+    * プライベートに使用するウェブサイトのため適当に設定
+* `ErrorLog`
+    * エラーログファイルの指定
+    * `APACHE_LOG_DIR` の環境変数は `/etc/apache2/envvars` に定義されている
+* `CustomLog`
+    * クライアントのアクセスログを記録するファイルとフォーマットを指定する
+    * 第2引数の `combined` は `LogFormat` ディレクティブで名前つけされたフォーマット
+        * `combined` は `apache2.conf` に以下の通り定義されている
+        * `LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" combined`
+    * 本ディレクティブは `mod_log_config` モジュールの機能
+
+#### php.ini の作成
+
+PHP の設定ファイル `プロジェクトトップ/docker/apache/php.ini` を以下の通り作成. 
+とりあえず, タイムゾーンと文字コードに関する設定だけ. 
+
+```
+[Date]
+date.timezone = "Asia/Tokyo"
+
+[mbstring]
+mbstring.internal_encoding = "UTF-8"
+mbstring.language = "Japanese"
+```
 
 
 #### db コンテナの Dockerfile の作成
@@ -572,6 +571,21 @@ mysql> select * from hoges;
 
 ## その他
 
+* Docker コンテナの停止と削除は以下のコマンドで実施
+    * `$ docker-compose down --rmi all --volumes --remove-orphans`
+        * `--rmi all`
+            * 使用したイメージも全て削除する
+        * `--volumes`
+            * volume を全削除
+        * `--remove-orphans`
+            * Compose ファイルで定義されていないコンテナも削除する
+
 * データベースへのアクセスをコマンドでやるとめんどくさいので `Sequel Ace` 等の GUI アプリを使用すると吉
     * localhost の ポートフォワードしているポートから使用できる
+
+## 出典
+
+作成にあたり以下の記事を参考にさせていただきました. 
+
+* https://akamist.com/blog/archives/5470
 
