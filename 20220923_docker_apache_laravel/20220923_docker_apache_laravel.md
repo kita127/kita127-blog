@@ -195,7 +195,7 @@ RUN a2enmod rewrite
 # docker php には mysql 用のドライバが未インストールのため追加する
 RUN docker-php-ext-install pdo_mysql
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.4.1 /usr/bin/composer /usr/bin/composer
 
 ADD docker/apache/php.ini /usr/local/etc/php/
 
@@ -214,6 +214,7 @@ RUN chown www-data storage/ -R \
 
 * `FROM`
     * 元となる Docker イメージの指定
+    * ホスト環境と同じ PHP 8.1 系をセレクト
     * Docker Hub の php イメージ, `8.1-apache-bullseye` タグを指定
         * [タグlink](https://hub.docker.com/layers/library/php/8.1-apache-bullseye/images/sha256-fcee566dcc5d4debf4bd46d11cddaf5eac3dc964eef465325bc4b073d0bf647c?context=explore)
     * `8.1-apache-bullseye` は Debian Apache に `mod_php` が含まれたタグ
@@ -222,7 +223,8 @@ RUN chown www-data storage/ -R \
 * `RUN apt-get update ....`
     * コンテナ起動時にパッケージ情報のアップデートと必要なパッケージをインストール
     * `iputils-ping` と `net-tools`
-        * `ping` を利用するためのインストール
+        * `ping` を利用するためインストール
+        * コンテナ間の疎通確認とかで使用したいがデフォルトではインストールされていないため追加
     * `docker-php-ext-install zip`
         * PHP 拡張をインストールするためのヘルパスクリプトとのこと
         * 詳細は Docker Hub の PHP イメージページを参照
@@ -232,8 +234,9 @@ RUN chown www-data storage/ -R \
     * Laravel でのルーティングにはこのモジュールの有効化が必要
 * `RUN docker-php-ext-install pdo_mysql`
     * Docker の PHP コンテナには MySQL 用のドライバがインストールされていないため追加する
-* `COPY --from=composer:latest /usr/bin/composer /usr/bin/composer`
-    * composer:latest イメージをビルドし作成した `composer` の実行形式をコンテナの `/usr/bin/composer` にコピーしているぽい
+* `COPY --from=composer:2.4.1 /usr/bin/composer /usr/bin/composer`
+    * composer:2.4.1 イメージをビルドし作成した `composer` の実行形式をコンテナの `/usr/bin/composer` にコピーしているぽい
+    * Composer のバージョンはホスト環境と合わせる
     * `COPY --from=name src dest`
         * `FROM <image> as <name>` として名前をつけて構築したステージをコピー元として指定できる
         * `composer:latest` を指定しているので名前つけをしたステージ以外にも image を直接指定もできるぽい？
@@ -245,8 +248,8 @@ RUN chown www-data storage/ -R \
 * `ADD docker/apache/config/000-default.conf /etc/apache2/sites-available/`
 * `RUN a2ensite 000-default`
     * `docker/apache/config` にある Apache のコンフィグファイル(`000-default.conf`)を `sites-available` に置く
-    * 大元のコンフィグファイルである `apache2.conf` では `sites-enabled` のみ `IncludeOptional` ディレクティブにより有効化される
-    * `sites-available` に置いたコンフィグファイルのシンボリックリンクを `sites-enabled` に置くことによりコンフィグを有効にする
+    * 大元のコンフィグファイルである `apache2.conf` では `sites-enabled/` のみ `IncludeOptional` ディレクティブにより有効化される. `sites-available/` は有効化されない
+    * `sites-available` に置いたコンフィグファイルのシンボリックリンクを `sites-enabled` に置くことにより `sites-available/` 内の任意のコンフィグを有効にする
     * シンボリックリンクの作成は直接作成して `sites-enabled` においても構わないが, `a2ensite` コマンドで作成可能
     * https://nanbu.marune205.net/2021/12/debian-apache2-dir.html
 * `WORKDIR /var/www/html`
@@ -289,7 +292,7 @@ Apache サーバのコンフィグファイル
     * プライベートに使用するウェブサイトのため適当に設定
 * `ErrorLog`
     * エラーログファイルの指定
-    * `APACHE_LOG_DIR` の環境変数は `/etc/apache2/envvars` に定義されている
+    * `APACHE_LOG_DIR` の環境変数はコンテナの `/etc/apache2/envvars` に定義されている
 * `CustomLog`
     * クライアントのアクセスログを記録するファイルとフォーマットを指定する
     * 第2引数の `combined` は `LogFormat` ディレクティブで名前つけされたフォーマット
@@ -307,7 +310,6 @@ PHP の設定ファイル `プロジェクトトップ/docker/apache/php.ini` �
 date.timezone = "Asia/Tokyo"
 
 [mbstring]
-mbstring.internal_encoding = "UTF-8"
 mbstring.language = "Japanese"
 ```
 
