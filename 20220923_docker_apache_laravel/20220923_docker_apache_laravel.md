@@ -39,6 +39,9 @@ Docker の勉強も兼ねてコンテナ連携の構築から自前で作成す�
     * PHP のパッケージマネージャ
 * docker desktop 4.5.0
     * Engine 20.10.12
+* コンテナ内環境
+    * PHP 8.1
+    * MySQL 8.0.30
 
 
 サーバ PC は準備中. おそらく ubuntu を採用する見込み. 
@@ -303,7 +306,7 @@ Apache サーバのコンフィグファイル
 #### php.ini の作成
 
 PHP の設定ファイル `プロジェクトトップ/docker/apache/php.ini` を以下の通り作成. 
-とりあえず, タイムゾーンと文字コードに関する設定だけ. 
+とりあえず, タイムゾーンと言語に関する設定だけ. 
 
 ```
 [Date]
@@ -342,6 +345,8 @@ SET CHARACTER_SET_CONNECTION = utf8;
 CREATE DATABASE `master`;
 ```
 
+以上で Apache と MySQL のコンテナ作成のための準備は完了. 
+
 ### Laravel プロジェクトの作成
 
 プロジェクトトップで以下のコマンドを実行し Laravel プロジェクトを作成する. 
@@ -364,7 +369,7 @@ $ composer create-project laravel/laravel webapp
 
 確認用なのでとりあえずデフォルトのままでOK. 
 
-Eloqent モデルを作成する. 
+Eloqent モデルを作成する. 以下のコマンドを実行. 
 
 `$ php artisan make:model Hoge`
 
@@ -372,7 +377,7 @@ Eloqent モデルを作成する.
 
 次にコントローラを以下のコマンドで作成. 
 
-`$ php artisan make:controller HogeController --invokable`
+`$ php artisan make:controller HogeDir/HogeController --invokable`
 
 `webapp/app/Http/Controllers/HogeDir/HogeController.php` が作成される. 
 
@@ -581,7 +586,8 @@ mysql> select * from hoges;
             * volume を全削除
         * `--remove-orphans`
             * Compose ファイルで定義されていないコンテナも削除する
-
+* `apache` コンテナ内での `php artisan migrate` はホストから `docker exec` コマンドでも OK
+    * `$ docker exec apache php artisan migrate`
 * データベースへのアクセスをコマンドでやるとめんどくさいので `Sequel Ace` 等の GUI アプリを使用すると吉
     * localhost の ポートフォワードしているポートから使用できる
 
