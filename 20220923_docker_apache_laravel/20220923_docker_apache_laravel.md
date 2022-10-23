@@ -190,8 +190,15 @@ FROM php:8.1-apache-bullseye
 
 # apt install iputils-ping net-tools で ping を導入
 RUN apt-get update \
- && apt-get install -y zlib1g-dev libzip-dev unzip vim iputils-ping net-tools\
+ && apt-get install -y zlib1g-dev libzip-dev unzip vim iputils-ping net-tools sudo\
  && docker-php-ext-install zip
+
+# node と npm をインストール
+RUN apt-get install -y gnupg
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -\
+ && apt-get install -y nodejs\
+ && npm install npm@8.12.1 --global
+
 
 # a2emod rewrite をして apache に rewrite モジュールを追加
 # これをしないと Laravel でルート以外にアクセスできない
@@ -234,6 +241,7 @@ RUN chown www-data storage/ -R \
         * PHP 拡張をインストールするためのヘルパスクリプトとのこと
         * 詳細は Docker Hub の PHP イメージページを参照
             * https://hub.docker.com/_/php
+* node と npm のインストールの詳細については[node/npmのインストール詳細](#node/npmのインストール詳細)を参照
 * `RUN a2enmod rewrite`
     * Apache に `rewrite` モジュールを追加する
     * Laravel でのルーティングにはこのモジュールの有効化が必要
@@ -244,7 +252,7 @@ RUN chown www-data storage/ -R \
     * Composer のバージョンはホスト環境と合わせる
     * `COPY --from=name src dest`
         * `FROM <image> as <name>` として名前をつけて構築したステージをコピー元として指定できる
-        * `composer:latest` を指定しているので名前つけをしたステージ以外にも image を直接指定もできるぽい？
+        * `composer:2.4.1` を指定しているので名前つけをしたステージ以外にも image を直接指定もできるぽい？
         * 詳細は Docker Hub の Composer イメージのページや Dockerfile リファレンスの `COPY` を参照
             * [COPYのリファレンス](https://docs.docker.jp/engine/reference/builder.html#copy)
             * [Composerイメージのページ](https://hub.docker.com/_/composer)
@@ -269,6 +277,28 @@ RUN chown www-data storage/ -R \
     * Laravel プロジェクトの `storage` フォルダ以下の所有者を `www-data` に変更する
 * `composer install`
     * `composer.lock` の内容でパッケージをインストール
+
+##### node/npmのインストール詳細
+
+Laravel でアプリケーションを作成する場合, 使用するパッケージによっては Node および npm を使用するため Docker 環境内に導入しておく. 
+導入に際して[Dockerでphpコンテナとかにnpmをインストールするときのメモ](https://tsyama.hatenablog.com/entry/docker-not-found-npm)を参考にさせていただきました. 
+
+Docker コンテナ上に構築される Debian のパッケージマネージャでは Node のバージョンが古かったり, npm が同梱されていなかったり等あるらしいので
+[NodeSource Node.js Binary Distributions](https://github.com/nodesource/distributions/blob/master/README.md#debinstall)からインストールする. 
+
+リンク先の記載内容を元に任意の Node をインストールする.<br>
+今回は Node 本体としては Debian 向けのバージョンは 18 を選択(`curl -fsSL https://deb.nodesource.com/setup_18.x | bash -`). 
+
+Node インストール後, 任意のバージョンの npm を取得するため npm でバージョン 8.12.1 の npm をインストール(`npm install npm@8.12.1 --global`). 
+
+```Dockerfile
+
+# node と npm をインストール
+RUN apt-get install -y gnupg
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -\
+ && apt-get install -y nodejs\
+ && npm install npm@8.12.1 --global
+```
 
 #### Apache のコンフィグファイルの作成
 
@@ -351,14 +381,33 @@ CREATE DATABASE `master`;
 
 ### Laravel プロジェクトの作成
 
-プロジェクトトップで以下のコマンドを実行し Laravel プロジェクトを作成する. 
+それでは Laravel プロジェクトを作成する. 
+
+今回は Docker 環境内で Laravel を動かすため, Docker 側から Laravel プロジェクトをインストールする. 
+
+プロジェクト直下で `docker-compose up -d --build` を実行しコンテナを立ち上げる. 
+その際 Dockerfile 内の `RUN chown www-data storage/ -R` によってまだ作成していない Laravel プロジェクト内の
+`storage` ディレクトリにアクセスしようとしエラーとなるので一旦 `docker/apache/Dockerfile` の以下部分の記述はコメントアウトしておく. 
 
 ```
-$ composer create-project laravel/laravel webapp
+#RUN chown www-data storage/ -R \
+# && composer install
 ```
 
-作成した `webapp` に移動し, `$ php artisan serve` を実行し Laravel のサーバを起動. 
-ブラウザから `http://localhost:8000` でアクセスし Laravel のデフォルトページが表示されるか確認する. 
+Docker コンテナが問題なく立ち上がったら `docker-compose exec apache bash` で apache コンテナ内に入る. 
+
+`/var/www/` に移動し以下コマンドを実行し html ディレクトリに Laravel プロジェクトを作成する. 
+
+```
+$ composer create-project laravel/laravel html
+```
+
+問題なく作成されたら exit しコンテナから出る. 
+
+その後, コメントアウトした Dockerfile の記述を元に戻し, 一旦 docker-compose をダウン(`docker-compose down --rmi all --volumes --remove-orphans`), 
+再度アップ(`docker-compose up -d --build`) し再構築する. 
+
+この状態でブラウザから `http://localhost:80` にアクセスし, Laravel のトップページが表示されれば問題なし. 
 
 #### Laravel から DB にアクセスする準備
 
