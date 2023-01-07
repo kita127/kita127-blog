@@ -100,7 +100,7 @@ xdebug.log = "/var/log/xdebug.log"
 以上で xdebug を使用する環境構築は完了. 
 任意の箇所にブレイクポイントを設定し, start debugging をすればステップ実行や変数の状態の確認などができるようになる. 
 
-<img width="50%" src="./images/breakpoint.png">
+<img width="50%" src="https://github.com/kita127/kita127-blog/blob/master/20220107_laravel_docker_xdebug/images/breakpoint.png?raw=true">
 
 ## 参考記事
 
