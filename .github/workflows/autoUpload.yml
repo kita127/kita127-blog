@@ -6,11 +6,11 @@ on:
       - kita127-patch-1
 
 jobs:
-  build:
+  run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install dependencies
+      - name: Install TypeScript
         run: npm install -g typescript
       - name: Compile TypeScript
         run: tsc autoUpload.ts
