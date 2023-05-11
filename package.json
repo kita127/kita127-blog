@@ -1,0 +1,15 @@
+{
+  "name": "kita127-blog",
+  "version": "1.0.0",
+  "description": "My blog",
+  "main": "autoUpload.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.4.0"
+  }
+}
