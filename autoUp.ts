@@ -1,11 +1,12 @@
 import axios from 'axios';
 //import xml2js from 'xml2js';
 //import Base64 from 'Base64';
+import { DOMParser } from 'xmldom';
 import { Buffer } from 'buffer';
 
 const userId = 'kita127';
 const blogId = 'kita127.hatenablog.com';
-const url = `https://blog.hatena.ne.jp/${userId}/${blogId}/atom/entry`;
+const URL = `https://blog.hatena.ne.jp/${userId}/${blogId}/atom/entry`;
 const username = 'kita127';
 const apiKey = 'sgzt3btztd';
 const basicAuth = 'Basic ' + btoa(userId + ':' + apiKey);
@@ -15,8 +16,8 @@ const basicAuth = 'Basic ' + btoa(userId + ':' + apiKey);
 //const entryId = '取得する記事のID';
 //const apiUrl = `https://blog.hatena.ne.jp/${userId}/${blogId}/atom/entry/${entryId}`;
 
-//get();
-post();
+get();
+//post();
 
 async function post(): Promise<void> {
     // リクエストのXMLデータを構築
@@ -42,7 +43,7 @@ async function post(): Promise<void> {
     const encodedApiKey = Buffer.from(`${userId}:${apiKey}`).toString('base64');
 
     // POSTリクエストを送信
-    const response = await axios.post(url, xmlData, {
+    const response = await axios.post(URL, xmlData, {
         headers: {
             'Authorization': `Basic ${encodedApiKey}`,
             'Content-Type': 'application/xml',
@@ -57,26 +58,41 @@ async function post(): Promise<void> {
     }
 }
 
-function get(): void {
-    axios.get(url, {
-        headers: {
-            'Content-Type': 'application/xml',
-        },
-        auth: {
-            username: username,
-            password: apiKey,
-        },
-    }).then(response => {
+async function get(): Promise<void> {
+
+    let url: string | null = URL;
+    while (url) {
+        const response = await axios.get(url, {
+            headers: {
+                'Content-Type': 'application/xml',
+            },
+            auth: {
+                username: username,
+                password: apiKey,
+            },
+        })
         const xmlString = response.data;
         console.log(xmlString);
-        // const parser = new DOMParser();
-        // const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
-        // const title = xmlDoc.getElementsByTagName('title')[0].textContent;
-        // const content = xmlDoc.getElementsByTagName('content')[0].textContent;
+
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
+        const title = xmlDoc.getElementsByTagName('title')[0].textContent;
+        const content = xmlDoc.getElementsByTagName('content')[0].textContent;
         // console.log(`Title: ${title}`);
         // console.log(`Content: ${content}`);
-    }).catch(error => {
-        console.error(error);
-    });
+
+        let nextLink: string | null = null;
+        const linkElements = xmlDoc.getElementsByTagName('link');
+        for (let i = 0; i < linkElements.length; i++) {
+            const relAttr = linkElements[i].getAttribute('rel');
+            if (relAttr && relAttr === 'next') {
+                nextLink = linkElements[i].getAttribute('href');
+                break;
+            }
+        }
+        url = nextLink;
+
+    }
+
 }
 
