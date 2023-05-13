@@ -59,6 +59,8 @@ async function post(): Promise<void> {
 }
 
 async function get(): Promise<void> {
+    let titles: string[] = [];
+    let cds: string[] = [];
 
     let url: string | null = URL;
     while (url) {
@@ -72,13 +74,46 @@ async function get(): Promise<void> {
             },
         })
         const xmlString = response.data;
-        console.log(xmlString);
+        //        console.log(xmlString);
 
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
-        const title = xmlDoc.getElementsByTagName('title')[0].textContent;
+
+        const entries = xmlDoc.getElementsByTagName('entry');
+        const children = Array.from(entries[0].childNodes);
+        for (const c of children) {
+            if (c.constructor.name === 'Element') {
+                if (c.nodeName === 'title' && c.textContent) {
+                    titles.push(c.textContent);
+                    continue;
+                } else if (c.nodeName === 'link') {
+                    const x: any = c;
+                    const attrs = x.attributes;
+                    if (attrs.length >= 2
+                        && attrs[0].nodeName === 'rel'
+                        && attrs[0].nodeValue === 'edit'
+                        && attrs[1].nodeName === 'href') {
+                        const code: string = attrs[1].nodeValue;
+                        cds.push(code);
+                    }
+
+                }
+
+            }
+        }
+
+        const titleTags = Array.from(xmlDoc.getElementsByTagName('title'));
+
+        for (const t of titleTags) {
+            if (t.textContent) {
+                titles.push(t.textContent);
+            }
+        }
+
+
+
         const content = xmlDoc.getElementsByTagName('content')[0].textContent;
-        // console.log(`Title: ${title}`);
+        //        console.log(`Title: ${title}`);
         // console.log(`Content: ${content}`);
 
         let nextLink: string | null = null;
