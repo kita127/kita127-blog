@@ -1,17 +1,10 @@
 import axios from 'axios';
-//import xml2js from 'xml2js';
-//import Base64 from 'Base64';
 import { DOMParser } from 'xmldom';
-//import { Buffer } from 'buffer';
 import { format } from 'util';
 import * as fs from 'fs';
 import { exit } from 'process';
 
-//const userId = 'kita127';
-//const blogId = 'kita127.hatenablog.com';
 const URL_TEMPLATE = `https://blog.hatena.ne.jp/%s/%s/atom/entry`;
-//const apiKey = 'sgzt3btztd';
-//const entryId = '4207575160648581415';
 
 interface Config {
     userId: string;
@@ -27,8 +20,6 @@ interface EntryInfo { title: string, url: string }
 
 // main 処理
 main();
-
-//put();
 
 async function main(): Promise<void> {
     // コンフィグ情報取得
@@ -55,12 +46,6 @@ async function main(): Promise<void> {
 
 }
 
-// put()
-//     .then((res) => console.log('更新が正常に終了'))
-//     .catch((error) => console.error('エラー発生', error));
-
-//post();
-
 function fetchEntryUrl(title: string, info: EntryInfo[]): string | null {
     const filterd = info.filter((i: EntryInfo) => i.title === title);
     if (filterd.length === 1) {
@@ -82,14 +67,11 @@ function readJsonFile(filePath: string): Config | null {
     }
 }
 
-function update(entry: { title: string; srcPath: string; }, config: Config, entryId: string, contents: string): void {
-    const url: string = entryId;
-    //    let url = `https://blog.hatena.ne.jp/kita127/kita127.hatenablog.com/atom/entry/${}`;
+function update(entry: { title: string; srcPath: string; }, config: Config, url: string, contents: string): void {
 
     // 更新するためのXMLデータを作成
     const xmlData = `<?xml version="1.0" encoding="utf-8"?>
     <entry xmlns="http://www.w3.org/2005/Atom">
-      <id>${entryId}</id>
       <title>${entry.title}</title>
       <content>${contents}</content>
       <updated>${new Date().toISOString()}</updated>
@@ -133,77 +115,6 @@ function create(entry: { title: string; srcPath: string; }, config: Config, cont
         throw new Error(`${error}`);
     });
 }
-
-
-async function put(): Promise<void> {
-    const userId = 'kita127';
-    const blogId = 'kita127.hatenablog.com';
-    const URL_TEMPLATE = `https://blog.hatena.ne.jp/${userId}/${blogId}/atom/entry`;
-    const apiKey = 'sgzt3btztd';
-    const entryId = '4207575160648581415';
-    //    const url: string = format(URL_TEMPLATE, userId, blogId);;
-    const url = 'https://blog.hatena.ne.jp/kita127/kita127.hatenablog.com/atom/entry/4207575160648611379';
-
-    // 更新するためのXMLデータを作成
-    const contents = `更新後コンテンツ`;
-    const xmlData = `<?xml version="1.0" encoding="utf-8"?>
-    <entry xmlns="http://www.w3.org/2005/Atom">
-      <id>${entryId}</id>
-      <title>更新後タイトル</title>
-      <content>${contents}</content>
-      <updated>${new Date().toISOString()}</updated>
-    </entry>`;
-
-    // 記事の更新
-    await axios.put(url, xmlData, {
-        headers: {
-            'Content-Type': 'application/xml',
-        },
-        auth: {
-            username: userId,
-            password: apiKey,
-        },
-    });
-}
-
-// async function post(): Promise<void> {
-//     // リクエストのXMLデータを構築
-//     const contents = `# タイトル
-// ## その1
-
-// 本文本文本文
-// 本文本文本文
-
-// ## その2
-
-// 本文
-// `
-
-//     const xmlData = `<?xml version="1.0" encoding="utf-8"?>
-//     <entry xmlns="http://www.w3.org/2005/Atom">
-//       <title>新規タイトル</title>
-//       <content>${contents}</content>
-//       <updated>${new Date().toISOString()}</updated>
-//     </entry>`;
-
-//     // POSTリクエストを送信
-//     const response = await axios.post(URL, xmlData, {
-//         headers: {
-//             'Content-Type': 'application/xml',
-//         },
-//         auth: {
-//             username: userId,
-//             password: apiKey,
-//         },
-//     });
-
-//     // HTTPステータスコードが201 Createdであれば、正常に処理されたと判断
-//     if (response.status === 201) {
-//         console.log('投稿が正常に処理されました。');
-//     } else {
-//         console.error(`HTTPステータスコード ${response.status} が返されました。`);
-//     }
-// }
 
 async function getEntriesInfo(config: Config): Promise<EntryInfo[]> {
     let titles: string[] = [];
