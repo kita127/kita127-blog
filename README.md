@@ -27,5 +27,37 @@ GitHub で管理しているブログをはてなブログに自動アップロ�
 - コンパイル
     - `$ tsc`
 - 実行
-    - `$ node ./dist/main.ts`
+    - `$ node ./dist/autoUp.js`
 
+
+`entries.json` に更新したい記事の情報を記載する.
+はてなブログ側に該当する記事がない場合は記事を新規作成する.
+
+```json
+{
+    "userId": "userId",
+    "blogId": "hoge.hatenablog.com",
+    "apiKey": "API Key の値",
+    "entries": [
+        {
+            "title": "Go言語でつくるインタプリタを Haskell で書く",
+            "srcPath": "./20191212_haskey/20191212_haskey.md"
+        },
+        {
+            "title": "stdedit : 標準入力をエディタで編集し結果を標準出力するコマンド",
+            "srcPath": "./20200329_stdedit/20200329_stdedit.md"
+        },
+    ]
+}
+```
+
+- apiKey
+    - はてなブログ API を使用する際に必要な API Key
+    - マイページの設定から確認できる
+- entries
+    - title
+        - 記事のタイトル
+        - ここの文字列とはてなブログ側で一致する記事に対して更新をするためピッタリ合わせる必要がある
+    - srcPath
+        - はてなブログにあげる記事のパス
+        - `autoUp.ts` からの相対パスで記述する
