@@ -35,6 +35,7 @@ GitHub で管理しているブログをはてなブログに自動アップロ�
 
 
 `entries.json` に更新したい記事の情報を記載する.
+`entries.json` は `entries.json.example` をコピーして `autoUp.ts` と同じディレクトリに置く.
 はてなブログ側に該当する記事がない場合は記事を新規作成する.
 
 ```json
