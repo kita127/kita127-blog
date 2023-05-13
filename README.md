@@ -22,6 +22,10 @@ https://kita127.hatenablog.com/
 
 GitHub で管理しているブログをはてなブログに自動アップロードするスクリプト.
 
+### Enviroment
+
+- TypeScript
+
 ### Usage
 
 - コンパイル
