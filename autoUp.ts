@@ -9,7 +9,7 @@ const blogId = 'kita127.hatenablog.com';
 const URL = `https://blog.hatena.ne.jp/${userId}/${blogId}/atom/entry`;
 const username = 'kita127';
 const apiKey = 'sgzt3btztd';
-const basicAuth = 'Basic ' + btoa(userId + ':' + apiKey);
+const entryId = '4207575160648581415';
 
 //GET https://blog.hatena.ne.jp/{はてなID}/{ブログID}/atom/entry
 
@@ -22,7 +22,9 @@ const basicAuth = 'Basic ' + btoa(userId + ':' + apiKey);
 //     console.error('エラー発生', error);
 // });
 
-put().catch((error) => console.error('エラー発生', error));
+put()
+    .then((res) => console.log('更新が正常に終了'))
+    .catch((error) => console.error('エラー発生', error));
 
 //post();
 
@@ -31,7 +33,7 @@ async function put(): Promise<void> {
     const contents = `更新後コンテンツ`;
     const xmlData = `<?xml version="1.0" encoding="utf-8"?>
     <entry xmlns="http://www.w3.org/2005/Atom">
-      <id>4207575160648093517</id>
+      <id>${entryId}</id>
       <title>更新後タイトル</title>
       <content>${contents}</content>
       <updated>${new Date().toISOString()}</updated>
@@ -42,10 +44,14 @@ async function put(): Promise<void> {
     const encodedApiKey = Buffer.from(`${userId}:${apiKey}`).toString('base64');
 
     // 記事の更新
-    await axios.put(`${URL}/4207575160648093517`, xmlData, {
+    await axios.put(`${URL}/${entryId}`, xmlData, {
         headers: {
-            'Authorization': `Basic ${encodedApiKey}`,
+            //            'Authorization': `Basic ${encodedApiKey}`,
             'Content-Type': 'application/xml',
+        },
+        auth: {
+            username: username,
+            password: apiKey,
         },
     });
 }
@@ -76,8 +82,12 @@ async function post(): Promise<void> {
     // POSTリクエストを送信
     const response = await axios.post(URL, xmlData, {
         headers: {
-            'Authorization': `Basic ${encodedApiKey}`,
+            //            'Authorization': `Basic ${encodedApiKey}`,
             'Content-Type': 'application/xml',
+        },
+        auth: {
+            username: username,
+            password: apiKey,
         },
     });
 
