@@ -23,10 +23,12 @@ interface Config {
     }[];
 }
 
-interface EntryInfo { title: string, code: string }
+interface EntryInfo { title: string, url: string }
 
 // main 処理
 main();
+
+//put();
 
 async function main(): Promise<void> {
     // コンフィグ情報取得
@@ -38,13 +40,13 @@ async function main(): Promise<void> {
 
     // はてな API で記事の情報を取得
     const info = await getEntriesInfo(config);
-//    console.log(info);
 
     for (const entry of config.entries) {
-        const entryId = fetchEntryId(entry.title, info);
+        const entryUrl = fetchEntryUrl(entry.title, info);
         const contents = fs.readFileSync(entry.srcPath, "utf8");
-        if (entryId) {
-            //            update(entry, config, entryId);
+        if (entryUrl) {
+            update(entry, config, entryUrl, contents);
+            console.log('記事を更新');
         } else {
             create(entry, config, contents);
             console.log('記事を新規作成');
@@ -59,10 +61,10 @@ async function main(): Promise<void> {
 
 //post();
 
-function fetchEntryId(title: string, info: EntryInfo[]): string | null {
+function fetchEntryUrl(title: string, info: EntryInfo[]): string | null {
     const filterd = info.filter((i: EntryInfo) => i.title === title);
     if (filterd.length === 1) {
-        return filterd[0].code;
+        return filterd[0].url;
     } else if (filterd.length === 0) {
         return null;
     } else {
@@ -80,8 +82,33 @@ function readJsonFile(filePath: string): Config | null {
     }
 }
 
-async function create(entry: { title: string; srcPath: string; }, config: Config, contents: string): Promise<void> {
-    const url: string | null = format(URL_TEMPLATE, config.userId, config.blogId);
+function update(entry: { title: string; srcPath: string; }, config: Config, entryId: string, contents: string): void {
+    const url: string = entryId;
+    //    let url = `https://blog.hatena.ne.jp/kita127/kita127.hatenablog.com/atom/entry/${}`;
+
+    // 更新するためのXMLデータを作成
+    const xmlData = `<?xml version="1.0" encoding="utf-8"?>
+    <entry xmlns="http://www.w3.org/2005/Atom">
+      <id>${entryId}</id>
+      <title>${entry.title}</title>
+      <content>${contents}</content>
+      <updated>${new Date().toISOString()}</updated>
+    </entry>`;
+
+    // 記事の更新
+    axios.put(url, xmlData, {
+        headers: {
+            'Content-Type': 'application/xml',
+        },
+        auth: {
+            username: config.userId,
+            password: config.apiKey,
+        },
+    }).catch((error) => { throw new Error(`${error}`) })
+}
+
+function create(entry: { title: string; srcPath: string; }, config: Config, contents: string): void {
+    const url: string = format(URL_TEMPLATE, config.userId, config.blogId);
     const xmlData = `<?xml version="1.0" encoding="utf-8"?>
     <entry xmlns="http://www.w3.org/2005/Atom">
       <title>${entry.title}</title>
@@ -108,28 +135,36 @@ async function create(entry: { title: string; srcPath: string; }, config: Config
 }
 
 
-// async function put(): Promise<void> {
-//     // 更新するためのXMLデータを作成
-//     const contents = `更新後コンテンツ`;
-//     const xmlData = `<?xml version="1.0" encoding="utf-8"?>
-//     <entry xmlns="http://www.w3.org/2005/Atom">
-//       <id>${entryId}</id>
-//       <title>更新後タイトル</title>
-//       <content>${contents}</content>
-//       <updated>${new Date().toISOString()}</updated>
-//     </entry>`;
+async function put(): Promise<void> {
+    const userId = 'kita127';
+    const blogId = 'kita127.hatenablog.com';
+    const URL_TEMPLATE = `https://blog.hatena.ne.jp/${userId}/${blogId}/atom/entry`;
+    const apiKey = 'sgzt3btztd';
+    const entryId = '4207575160648581415';
+    //    const url: string = format(URL_TEMPLATE, userId, blogId);;
+    const url = 'https://blog.hatena.ne.jp/kita127/kita127.hatenablog.com/atom/entry/4207575160648611379';
 
-//     // 記事の更新
-//     await axios.put(`${URL}/${entryId}`, xmlData, {
-//         headers: {
-//             'Content-Type': 'application/xml',
-//         },
-//         auth: {
-//             username: userId,
-//             password: apiKey,
-//         },
-//     });
-// }
+    // 更新するためのXMLデータを作成
+    const contents = `更新後コンテンツ`;
+    const xmlData = `<?xml version="1.0" encoding="utf-8"?>
+    <entry xmlns="http://www.w3.org/2005/Atom">
+      <id>${entryId}</id>
+      <title>更新後タイトル</title>
+      <content>${contents}</content>
+      <updated>${new Date().toISOString()}</updated>
+    </entry>`;
+
+    // 記事の更新
+    await axios.put(url, xmlData, {
+        headers: {
+            'Content-Type': 'application/xml',
+        },
+        auth: {
+            username: userId,
+            password: apiKey,
+        },
+    });
+}
 
 // async function post(): Promise<void> {
 //     // リクエストのXMLデータを構築
@@ -172,7 +207,7 @@ async function create(entry: { title: string; srcPath: string; }, config: Config
 
 async function getEntriesInfo(config: Config): Promise<EntryInfo[]> {
     let titles: string[] = [];
-    let cds: string[] = [];
+    let urlLs: string[] = [];
 
     let url: string | null = format(URL_TEMPLATE, config.userId, config.blogId);
     while (url) {
@@ -206,9 +241,9 @@ async function getEntriesInfo(config: Config): Promise<EntryInfo[]> {
                             && attrs[0].nodeName === 'rel'
                             && attrs[0].nodeValue === 'edit'
                             && attrs[1].nodeName === 'href') {
-                            // entry_id を取得
-                            const code: string = attrs[1].nodeValue;
-                            cds.push(code);
+                            // 記事のurl取得
+                            const entryUrl: string = attrs[1].nodeValue;
+                            urlLs.push(entryUrl);
                         }
                         continue;
                     }
@@ -232,7 +267,7 @@ async function getEntriesInfo(config: Config): Promise<EntryInfo[]> {
     let info: EntryInfo[] = [];
 
     for (let i = 0; i < titles.length; i++) {
-        const o = { title: titles[i], code: cds[i] };
+        const o = { title: titles[i], url: urlLs[i] };
         info.push(o);
     }
     return info;
