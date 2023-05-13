@@ -16,13 +16,39 @@ const basicAuth = 'Basic ' + btoa(userId + ':' + apiKey);
 //const entryId = '取得する記事のID';
 //const apiUrl = `https://blog.hatena.ne.jp/${userId}/${blogId}/atom/entry/${entryId}`;
 
-get().then((info: { title: string, code: string }[]) => {
-    console.log(info);
-}).catch((error) => {
-    console.error('エラー発生', error);
-});
+// get().then((info: { title: string, code: string }[]) => {
+//     console.log(info);
+// }).catch((error) => {
+//     console.error('エラー発生', error);
+// });
+
+put().catch((error) => console.error('エラー発生', error));
 
 //post();
+
+async function put(): Promise<void> {
+    // 更新するためのXMLデータを作成
+    const contents = `更新後コンテンツ`;
+    const xmlData = `<?xml version="1.0" encoding="utf-8"?>
+    <entry xmlns="http://www.w3.org/2005/Atom">
+      <id>4207575160648093517</id>
+      <title>更新後タイトル</title>
+      <content>${contents}</content>
+      <updated>${new Date().toISOString()}</updated>
+    </entry>`;
+
+
+    // Authorizationヘッダに含める認証情報をBase64エンコード
+    const encodedApiKey = Buffer.from(`${userId}:${apiKey}`).toString('base64');
+
+    // 記事の更新
+    await axios.put(`${URL}/4207575160648093517`, xmlData, {
+        headers: {
+            'Authorization': `Basic ${encodedApiKey}`,
+            'Content-Type': 'application/xml',
+        },
+    });
+}
 
 async function post(): Promise<void> {
     // リクエストのXMLデータを構築
@@ -106,10 +132,6 @@ async function get(): Promise<Array<{ title: string, code: string }>> {
                 }
             }
         }
-
-        // const content = xmlDoc.getElementsByTagName('content')[0].textContent;
-        //        console.log(`Title: ${title}`);
-        // console.log(`Content: ${content}`);
 
         let nextLink: string | null = null;
         const linkElements = xmlDoc.getElementsByTagName('link');
