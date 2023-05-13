@@ -2,29 +2,30 @@ import axios from 'axios';
 //import xml2js from 'xml2js';
 //import Base64 from 'Base64';
 import { DOMParser } from 'xmldom';
-import { Buffer } from 'buffer';
+//import { Buffer } from 'buffer';
 
 const userId = 'kita127';
 const blogId = 'kita127.hatenablog.com';
 const URL = `https://blog.hatena.ne.jp/${userId}/${blogId}/atom/entry`;
-const username = 'kita127';
 const apiKey = 'sgzt3btztd';
 const entryId = '4207575160648581415';
 
-//GET https://blog.hatena.ne.jp/{はてなID}/{ブログID}/atom/entry
+interface EntryInfo { title: string, code: string }
 
-//const entryId = '取得する記事のID';
-//const apiUrl = `https://blog.hatena.ne.jp/${userId}/${blogId}/atom/entry/${entryId}`;
+// main 処理
+main();
 
-// get().then((info: { title: string, code: string }[]) => {
-//     console.log(info);
-// }).catch((error) => {
-//     console.error('エラー発生', error);
-// });
+function main(): void {
+    getEntriesInfo()
+        .then((info: EntryInfo[]) => {
+            console.log(info);
+        })
+        .catch((error) => console.error(error));
+}
 
-put()
-    .then((res) => console.log('更新が正常に終了'))
-    .catch((error) => console.error('エラー発生', error));
+// put()
+//     .then((res) => console.log('更新が正常に終了'))
+//     .catch((error) => console.error('エラー発生', error));
 
 //post();
 
@@ -39,18 +40,13 @@ async function put(): Promise<void> {
       <updated>${new Date().toISOString()}</updated>
     </entry>`;
 
-
-    // Authorizationヘッダに含める認証情報をBase64エンコード
-    const encodedApiKey = Buffer.from(`${userId}:${apiKey}`).toString('base64');
-
     // 記事の更新
     await axios.put(`${URL}/${entryId}`, xmlData, {
         headers: {
-            //            'Authorization': `Basic ${encodedApiKey}`,
             'Content-Type': 'application/xml',
         },
         auth: {
-            username: username,
+            username: userId,
             password: apiKey,
         },
     });
@@ -76,17 +72,13 @@ async function post(): Promise<void> {
       <updated>${new Date().toISOString()}</updated>
     </entry>`;
 
-    // Authorizationヘッダに含める認証情報をBase64エンコード
-    const encodedApiKey = Buffer.from(`${userId}:${apiKey}`).toString('base64');
-
     // POSTリクエストを送信
     const response = await axios.post(URL, xmlData, {
         headers: {
-            //            'Authorization': `Basic ${encodedApiKey}`,
             'Content-Type': 'application/xml',
         },
         auth: {
-            username: username,
+            username: userId,
             password: apiKey,
         },
     });
@@ -99,7 +91,7 @@ async function post(): Promise<void> {
     }
 }
 
-async function get(): Promise<Array<{ title: string, code: string }>> {
+async function getEntriesInfo(): Promise<EntryInfo[]> {
     let titles: string[] = [];
     let cds: string[] = [];
 
@@ -110,13 +102,13 @@ async function get(): Promise<Array<{ title: string, code: string }>> {
                 'Content-Type': 'application/xml',
             },
             auth: {
-                username: username,
+                username: userId,
                 password: apiKey,
             },
         })
-        const xmlString = response.data;
-        //        console.log(xmlString);
 
+        // タイトルと entry_id を取得する処理
+        const xmlString = response.data;
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
 
@@ -135,14 +127,17 @@ async function get(): Promise<Array<{ title: string, code: string }>> {
                             && attrs[0].nodeName === 'rel'
                             && attrs[0].nodeValue === 'edit'
                             && attrs[1].nodeName === 'href') {
+                            // entry_id を取得
                             const code: string = attrs[1].nodeValue;
                             cds.push(code);
                         }
+                        continue;
                     }
                 }
             }
         }
 
+        // 残りのページ取得のためのリンク取得
         let nextLink: string | null = null;
         const linkElements = xmlDoc.getElementsByTagName('link');
         for (let i = 0; i < linkElements.length; i++) {
@@ -153,13 +148,9 @@ async function get(): Promise<Array<{ title: string, code: string }>> {
             }
         }
         url = nextLink;
-
     }
 
-    let info: {
-        title: string;
-        code: string;
-    }[] = [];
+    let info: EntryInfo[] = [];
 
     for (let i = 0; i < titles.length; i++) {
         const o = { title: titles[i], code: cds[i] };
