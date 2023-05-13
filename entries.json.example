@@ -1,0 +1,15 @@
+{
+    "userId": "userId",
+    "blogId": "hoge.hatenablog.com",
+    "apiKey": "API Key の値",
+    "entries": [
+        {
+            "title": "Go言語でつくるインタプリタを Haskell で書く",
+            "srcPath": "./20191212_haskey/20191212_haskey.md"
+        },
+        {
+            "title": "stdedit : 標準入力をエディタで編集し結果を標準出力するコマンド",
+            "srcPath": "./20200329_stdedit/20200329_stdedit.md"
+        }
+    ]
+}
