@@ -9,9 +9,9 @@ import { exit } from 'process';
 
 //const userId = 'kita127';
 //const blogId = 'kita127.hatenablog.com';
-const URL = `https://blog.hatena.ne.jp/%s/%s/atom/entry`;
+const URL_TEMPLATE = `https://blog.hatena.ne.jp/%s/%s/atom/entry`;
 //const apiKey = 'sgzt3btztd';
-const entryId = '4207575160648581415';
+//const entryId = '4207575160648581415';
 
 interface Config {
     userId: string;
@@ -28,18 +28,29 @@ interface EntryInfo { title: string, code: string }
 // main 処理
 main();
 
-function main(): void {
+async function main(): Promise<void> {
+    // コンフィグ情報取得
     const config = readJsonFile("./entries.json");
     if (config === null) {
         console.error('entries.jsonのパースに失敗');
         exit(1);
     }
 
-    getEntriesInfo(config)
-        .then((info: EntryInfo[]) => {
-            console.log(info);
-        })
-        .catch((error) => console.error(error));
+    // はてな API で記事の情報を取得
+    const info = await getEntriesInfo(config);
+//    console.log(info);
+
+    for (const entry of config.entries) {
+        const entryId = fetchEntryId(entry.title, info);
+        const contents = fs.readFileSync(entry.srcPath, "utf8");
+        if (entryId) {
+            //            update(entry, config, entryId);
+        } else {
+            create(entry, config, contents);
+            console.log('記事を新規作成');
+        }
+    }
+
 }
 
 // put()
@@ -47,6 +58,17 @@ function main(): void {
 //     .catch((error) => console.error('エラー発生', error));
 
 //post();
+
+function fetchEntryId(title: string, info: EntryInfo[]): string | null {
+    const filterd = info.filter((i: EntryInfo) => i.title === title);
+    if (filterd.length === 1) {
+        return filterd[0].code;
+    } else if (filterd.length === 0) {
+        return null;
+    } else {
+        throw new Error('同じタイトルの記事が複数存在する');
+    }
+}
 
 function readJsonFile(filePath: string): Config | null {
     try {
@@ -56,6 +78,33 @@ function readJsonFile(filePath: string): Config | null {
         console.error(`Failed to read JSON file: ${error}`);
         return null;
     }
+}
+
+async function create(entry: { title: string; srcPath: string; }, config: Config, contents: string): Promise<void> {
+    const url: string | null = format(URL_TEMPLATE, config.userId, config.blogId);
+    const xmlData = `<?xml version="1.0" encoding="utf-8"?>
+    <entry xmlns="http://www.w3.org/2005/Atom">
+      <title>${entry.title}</title>
+      <content>${contents}</content>
+      <updated>${new Date().toISOString()}</updated>
+    </entry>`;
+
+    // POSTリクエストを送信
+    axios.post(url, xmlData, {
+        headers: {
+            'Content-Type': 'application/xml',
+        },
+        auth: {
+            username: config.userId,
+            password: config.apiKey,
+        },
+    }).then((response) => {
+        if (response.status !== 201) {
+            throw new Error(`HTTPステータスコード ${response.status}`)
+        }
+    }).catch((error) => {
+        throw new Error(`${error}`);
+    });
 }
 
 
@@ -125,7 +174,7 @@ async function getEntriesInfo(config: Config): Promise<EntryInfo[]> {
     let titles: string[] = [];
     let cds: string[] = [];
 
-    let url: string | null = format(URL, config.userId, config.blogId);
+    let url: string | null = format(URL_TEMPLATE, config.userId, config.blogId);
     while (url) {
         const response = await axios.get(url, {
             headers: {
