@@ -13,6 +13,13 @@
             ],
             "program": "${workspaceFolder}/autoUp.ts",
             "preLaunchTask": "tsc: build - tsconfig.json",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "args": [
+                "${workspaceFolder}/autoUp.ts"
+            ],
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
             ]
