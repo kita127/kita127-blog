@@ -3,6 +3,7 @@ import { DOMParser } from 'xmldom';
 import { format } from 'util';
 import * as fs from 'fs';
 import { exit } from 'process';
+import * as he from 'he';
 
 const URL_TEMPLATE = `https://blog.hatena.ne.jp/%s/%s/atom/entry`;
 
@@ -68,12 +69,13 @@ function readJsonFile(filePath: string): Config | null {
 }
 
 function update(entry: { title: string; srcPath: string; }, config: Config, url: string, contents: string): void {
+    const escaped = he.escape(contents);
 
     // 更新するためのXMLデータを作成
     const xmlData = `<?xml version="1.0" encoding="utf-8"?>
     <entry xmlns="http://www.w3.org/2005/Atom">
       <title>${entry.title}</title>
-      <content>${contents}</content>
+      <content>${escaped}</content>
       <updated>${new Date().toISOString()}</updated>
     </entry>`;
 
@@ -91,10 +93,11 @@ function update(entry: { title: string; srcPath: string; }, config: Config, url:
 
 function create(entry: { title: string; srcPath: string; }, config: Config, contents: string): void {
     const url: string = format(URL_TEMPLATE, config.userId, config.blogId);
+    const escaped = he.escape(contents);
     const xmlData = `<?xml version="1.0" encoding="utf-8"?>
     <entry xmlns="http://www.w3.org/2005/Atom">
       <title>${entry.title}</title>
-      <content>${contents}</content>
+      <content>${escaped}</content>
       <updated>${new Date().toISOString()}</updated>
     </entry>`;
 
