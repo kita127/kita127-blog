@@ -214,3 +214,23 @@ function update(title: string, contents: string): void {
 
 ```
 
+## 注意事項
+
+### 記事のコンテンツは HTML エスケープすること
+
+`<content>` タグ内のテキストに HTML のタグがあるとサーバ側に怒られるため, 記事の内容はエスケープすること.<br>
+
+```typescript
+import * as he from 'he';
+
+    const escaped = he.escape(contents);
+
+    // 更新するためのXMLデータを作成
+    const xmlData = `<?xml version="1.0" encoding="utf-8"?>
+    <entry xmlns="http://www.w3.org/2005/Atom">
+      <title>${entry.title}</title>
+      <content>${escaped}</content>
+      <updated>${new Date().toISOString()}</updated>
+    </entry>`;
+
+```
