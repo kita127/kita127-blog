@@ -93,8 +93,95 @@ class LoginController extends Controller
 
 `web.php`にルーティングを追加する。
 
+```php
+Route::post('/login', [LoginController::class, 'authenticate']);
+```
 
+#### ログイン画面の実装
 
+ログイン画面はSSRで実現するためLaravelのBladeを使用する。
 
+`resources/views/login.blade.php`を作成する
 
+```blade
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Login</title>
+</head>
+
+<body>
+    <section>
+        <h1>Login</h1>
+
+        <div>
+            <form action="{{ url('/login') }}" method="POST">
+                {{ csrf_field() }}
+                <div>
+                    <p>email</p>
+                    <input type="email" name="email" value="{{ old('email') }}" required autofocus>
+
+                    @error('email')
+                        <div>
+                            {{ $message }}
+                        </div>
+                    @enderror
+
+                </div>
+                <div>
+                    <p>password</p>
+                    <input type="text" name="password">
+                </div>
+                <div>
+                    <!-- 送信ボタン -->
+                    <input type="submit" value="送信">
+                </div>
+            </form>
+        </div>
+
+    </section>
+
+</body>
+
+</html>
+```
+
+- `form`タグで先ほど作成した認証ルートにCSRFトークン付きでPOST
+- 認証がエラーした場合はフラッシュメッセージとして`@error('email')`部分を表示
+
+ログイン画面のコントローラを作る。`LoginController.php`に以下のメソッドを追加する。
+
+```php
+    public function index(): View
+    {
+        return view('login');
+    }
+```
+
+`web.php`にルーティングを追加する。
+```php
+Route::get('/login', [LoginController::class, 'index'])->name('login');
+```
+#### ログイン先の画面を作る
+
+ログイン成功時の遷移先の画面を作る。`resources/views/index.blade.php`を作る。後ほどSPAログインに変更する際にまた書きかえるので一旦は遷移したことがわかる程度の内容にする。
+
+```blade
+<! DOCTYPE html>
+<html>
+<head></head>
+<body>
+    <div>ログインしました</div>
+</body>
+</html>
+```
+
+`web.php`にルーティングを追加する。
+
+```php
+Route::get('/login', [LoginController::class, 'index'])->name('login');
+```
