@@ -183,14 +183,17 @@ Route::get('/login', [LoginController::class, 'index'])->name('login');
 `web.php`にルーティングを追加する。
 
 ```php
-Route::get('/login', [LoginController::class, 'index'])->name('login');
+Route::get('/', [LoginController::class, 'index']);
 ```
 
 ### ログアウトの実装
 
-#### ログアウトのコントローラを作成する
+#### ログアウトの処理を作成する
 
-これも基本的には
+コントローラの作成。
+これも基本的には以下の参照先に記載の「ログアウト」の項目の通り実装する。
+
+https://readouble.com/laravel/9.x/ja/authentication.html
 
 ```php
 <?php
@@ -219,6 +222,36 @@ class LogoutController extends Controller
 }
 ```
 
+- セッションを無効にする
+- CSRFトークンを初期化する
+- ログアウト後の画面にリダイレクトする
+
+コントローラが完成したら`web.php`にルーティングを追加する。
+```php
+Route::post('/logout', [LogoutController::class, 'logout']);
 ```
 
+#### ログアウトボタンを画面に追加する
 
+ログアウトするためのボタンを`index.blade.php`に追加する。
+
+```blade
+<! DOCTYPE html>
+<html>
+<head></head>
+<body>
+    <div>ログインしました</div>
+    <div>
+        <form action="{{ url('/logout') }}" method="POST">
+            {{ csrf_field() }}
+            <div>
+                <input type="submit" value="ログアウト">
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+```
+ログイン後、ログアウトボタンを押すとログイン画面にリダイレクトされればOK。
+
+### ルートを認証で保護する
