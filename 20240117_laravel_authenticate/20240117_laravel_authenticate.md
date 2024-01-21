@@ -185,3 +185,40 @@ Route::get('/login', [LoginController::class, 'index'])->name('login');
 ```php
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 ```
+
+### ログアウトの実装
+
+#### ログアウトのコントローラを作成する
+
+これも基本的には
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+
+class LogoutController extends Controller
+{
+    /**
+     * ユーザーをアプリケーションからログアウトさせる
+     */
+    public function logout(Request $request): RedirectResponse
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect('/login');
+    }
+}
+```
+
+```
+
+
