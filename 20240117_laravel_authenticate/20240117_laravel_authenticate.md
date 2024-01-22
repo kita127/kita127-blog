@@ -35,7 +35,18 @@ CSRFトークンについての補足<br>
 
 今回はログイン画面はSSRで実装しログイン後はSPAとなる構成としている。
 
-[[画像]]
+
+```mermaid
+sequenceDiagram
+    Client->>+Server: GET /login(ログイン画面取得)
+    Server-->>-Client: login画面
+    Client->>+Server: POST /login(認証)
+    Server-->>-Client: 302 Location /
+    Client->>+Server: GET /(トップ画面取得)
+    Server-->>-Client: トップ画面
+    Client->>+Client: SPA
+
+```
 
 ## 実装手順
 
