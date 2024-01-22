@@ -275,7 +275,7 @@ Route::get('/', function () {
 ここまででSSRによる認証の機構は完成したので、最終のゴール地点である「ログインまでSSRで行いログイン後はSPAとして動かす」
 ところまでを実装する。なお、フロントのフレームワークとしてはVue.jsを使用するが、こちらの細かい実装内容については割愛する。
 
-`index.blade.php`をVueを埋め込めるよう変更した上、`resources/js/components/App.vue`を以下の通り実装する。
+`index.blade.php`にVueを埋め込めるよう変更した上、`resources/js/components/App.vue`を以下の通り実装する。
 
 ```vue
 <template>
@@ -298,3 +298,5 @@ const logout = (): void => {
 ```
 
 ログアウトをリクエスト後、`window.location.href`を更新してフロント側で自前でロケーションを切り替える必要がある。
+
+以上でLaravelでSPA認証する実装が完了。
