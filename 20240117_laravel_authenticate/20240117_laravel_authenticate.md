@@ -28,17 +28,7 @@ LaravelでのSPA認証の実装方法の覚書。
 
 今回はログイン画面はSSRで実装しログイン後はSPAとなる構成としている。
 
-```mermaid
-sequenceDiagram
-    Client->>+Server: GET /login(ログイン画面取得)
-    Server-->>-Client: login画面
-    Client->>+Server: POST /login(認証)
-    Server-->>-Client: 302 Location /
-    Client->>+Server: GET /(トップ画面取得)
-    Server-->>-Client: トップ画面
-    Client->>+Client: SPA
-
-```
+<img src="https://github.com/kita127/kita127-blog/blob/master/20240117_laravel_authenticate/images/sequence/sequence.png" width="50%">
 
 ## 実装手順
 
