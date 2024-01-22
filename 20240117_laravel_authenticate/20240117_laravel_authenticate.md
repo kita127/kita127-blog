@@ -10,21 +10,20 @@ LaravelでのSPA認証の実装方法の覚書。
 
 ## 環境
 
-- Laravelのバージョン(9.x)
-- Sanctumのバージョン
-- Vue.jsのバージョン
 - PHPのバージョン
+    - 8.1.27
+- Laravelのバージョン
+    - v9.52.16
+- Sanctumのバージョン
+    - v3.3.3
 
 ## 参照ドキュメント
 
+- Laravel 9.x 認証
+    - https://readouble.com/laravel/9.x/ja/authentication.html
 - Laravel 9.x Laravel Sanctum
-  - https://readouble.com/laravel/9.x/ja/sanctum.html
+    - https://readouble.com/laravel/9.x/ja/sanctum.html
  
-## 認証の流れ
-
-1. ログイン
-2. APIを認証で保護する
-
 ## 構成
 
 今回はログイン画面はSSRで実装しログイン後はSPAとなる構成としている。
@@ -48,9 +47,6 @@ sequenceDiagram
 2. ログアウトの実装
 3. ルートを認証で保護する
 4. フロントの実装
-    1. ログインはSSR
-    2. ログアウトはAPI
-    3. Sanctumの準備
 
 ### ログインの実装
 
@@ -262,8 +258,9 @@ Route::post('/logout', [LogoutController::class, 'logout']);
 
 ### ルートを認証で保護する
 
-ログイン状態でないと`/`にはアクセスできないように`web.php`実装する。
-参照先の「ルートの保護」の通り実装する。
+ログイン状態でないと`/`にはアクセスできないように`web.php`実装する。参照先の「ルートの保護」の通り実装する。
+
+https://readouble.com/laravel/9.x/ja/authentication.html
 
 ```php
 Route::get('/', function () {
