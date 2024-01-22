@@ -43,7 +43,7 @@ CSRFトークンについての補足<br>
     1. ログイン画面はSSRで実装する
 2. ログアウトの実装
 3. ルートを認証で保護する
-4. フロントでログイン/ログアウトの実装
+4. フロントの実装
     1. ログインはSSR
     2. ログアウトはAPI
     3. Sanctumの準備
@@ -183,7 +183,9 @@ Route::get('/login', [LoginController::class, 'index'])->name('login');
 `web.php`にルーティングを追加する。
 
 ```php
-Route::get('/', [LoginController::class, 'index']);
+Route::get('/', function () {
+    return view('index');
+});
 ```
 
 ### ログアウトの実装
@@ -255,3 +257,44 @@ Route::post('/logout', [LogoutController::class, 'logout']);
 ログイン後、ログアウトボタンを押すとログイン画面にリダイレクトされればOK。
 
 ### ルートを認証で保護する
+
+ログイン状態でないと`/`にはアクセスできないように`web.php`実装する。
+参照先の「ルートの保護」の通り実装する。
+
+```php
+Route::get('/', function () {
+    // 認証済みユーザーのみがこのルートにアクセス可能
+    return view('index');
+})->middleware('auth');
+```
+
+`->middleware()`の追加でこのルートには認証済みのユーザしかアクセスできないようになる。
+
+### フロントの実装
+
+ここまででSSRによる認証の機構は完成したので、最終のゴール地点である「ログインまでSSRで行いログイン後はSPAとして動かす」
+ところまでを実装する。なお、フロントのフレームワークとしてはVue.jsを使用するが、こちらの細かい実装内容については割愛する。
+
+`index.blade.php`をVueを埋め込めるよう変更した上、`resources/js/components/App.vue`を以下の通り実装する。
+
+```vue
+<template>
+    <div>
+        <p>Vueのページ</p>
+    </div>
+    <div>
+        <button type="button" v-on:click="logout"> ログアウト </button>
+    </div>
+</template>
+
+<script lang="ts" setup>
+import axios from "axios";
+
+const logout = (): void => {
+    axios.post("logout");
+    window.location.href = "/login";
+};
+</script>
+```
+
+ログアウトをリクエスト後、`window.location.href`を更新してフロント側で自前でロケーションを切り替える必要がある。
