@@ -25,16 +25,9 @@ LaravelでのSPA認証の実装方法の覚書。
 1. ログイン
 2. APIを認証で保護する
 
-CSRFトークンについての補足<br>
-ログインからフロント側で実装する場合はCSRFトークンの初期化が必要だが、
-本記事の手順では最初のSSRによるログイン画面取得で`XSRF-TOKEN`が取得できており、
-その後はaxiosが自動でリクエストに付与してくれるため特にこのあたりは設定不要。
-ログインからフロントで実行する場合はCSRFトークンの初期化が必要になる。
-
 ## 構成
 
 今回はログイン画面はSSRで実装しログイン後はSPAとなる構成としている。
-
 
 ```mermaid
 sequenceDiagram
@@ -310,4 +303,47 @@ const logout = (): void => {
 
 ログアウトをリクエスト後、`window.location.href`を更新してフロント側で自前でロケーションを切り替える必要がある。
 
-以上でLaravelでSPA認証する実装が完了。
+#### Sanctumについて
+
+フロント側で認証する場合、Sanctumによる以下の手順が必要だが。
+
+1. Sanctumのミドルウェアを`app/Http/Kernel.php`に追加
+1. ログイン前に`sanctum/csrf-cookie`にアクセスしCSRFトークンを初期化
+    - `XSRF-TOKEN`を取得する
+1. リクエスト時に`XSRF-TOKEN`をヘッダに付与する
+1. ログイン後にアクセスするルーティングをSanctumミドルウェアで保護する
+
+1に関しては自分の環境ではLaravelにデフォルトで設定されていた。
+`throttle:api`が該当。
+
+`app/Http/Kernel.php`
+```php
+        'api' => [
+            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            'throttle:api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ],
+```
+
+2の`sanctum/csrf-cookie`のルーティングもデフォルトで設定されている。
+また、初めのSSRの認証時にCSRFトークンを取得するため、特に以下へのアクセスは本手順では不要。
+
+php artisan route:list
+```
+  GET|HEAD   sanctum/csrf-cookie ............................................... sanctum.csrf-cookie › Laravel\Sanctum › CsrfCookieController@show
+
+```
+
+3のトークンの付与は`axios`などのライブラリを使用した場合自動で付与してくれる。<br>
+
+4のログイン後にアクセスするルーティングの保護は`routes/api.php`にデフォルトで参考となるソースがあるためこちらを元に実装する。
+
+
+```php
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    $user = $request->user();
+    return $user->toRistrictedArray();
+});
+```
+
+以上でLaravelによるSPA認証の実装が完了。
