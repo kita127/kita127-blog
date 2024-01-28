@@ -28,7 +28,7 @@ LaravelでのSPA認証の実装方法の覚書。
 
 今回はログイン画面はSSRで実装しログイン後はSPAとなる構成としている。
 
-<img src="https://github.com/kita127/kita127-blog/blob/master/20240117_laravel_authenticate/images/sequence/sequence.png" width="50%">
+<img src="https://github.com/kita127/kita127-blog/blob/master/20240117_laravel_authenticate/images/sequence/sequence.png?raw=true" width="50%">
 
 ## 実装手順
 
