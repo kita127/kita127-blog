@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { DOMParser } from 'xmldom';
+import { DOMParser } from '@xmldom/xmldom';
 import { format } from 'util';
 import * as fs from 'fs';
 import { exit } from 'process';
