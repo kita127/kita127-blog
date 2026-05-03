@@ -11,8 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@types/he": "^1.2.0",
-    "@xmldom/xmldom": "^0.9.9",
-    "axios": "^1.4.0",
+    "@xmldom/xmldom": "^0.9.10",
+    "axios": "^1.15.0",
     "Base64": "^1.2.0",
     "gray-matter": "^4.0.3",
     "he": "^1.2.0",
